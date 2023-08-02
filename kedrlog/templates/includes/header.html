@@ -1,0 +1,14 @@
+<nav class="navbar navbar-light">
+  <div class="container-fluid mt-5 border-1" style="background-color: #ffffff;">
+    {% load static %}
+    <div class="col-9">
+      <a class="navbar-brand text-maxlife fs-3" href="{% url 'reports:index' %}"><img src="{% static 'img/logo.jpg' %}" alt="Logo MaxLife" height="40"><span class="ms-5"><b>Приложение "Отчетность МАКС-Жизнь"</b></span></a>
+    </div>
+    <div class="col-3">
+      <span class="fs-3 text-maxlife">Привет, {{ user.name }} {{ user.lastname }}</span>
+      {% if user.photo %}
+        <img src="{{ user.photo }}" class="rounded-circle ms-3" alt="user photo" width="30" height="30">
+      {% endif %}
+    </div>
+  </div>
+</nav>
