@@ -1,0 +1,12 @@
+<li class="nav-item">
+  <a class="nav-link {% if request.resolver_match.url_name == "index" %}active{% endif %}" href="{% url 'personal:index' %}">Мои данные</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link {% if request.resolver_match.url_name == "reserve" %}active{% endif %}" href="{% url 'personal:reserve' %}">Мои бронирования</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link {% if request.resolver_match.url_name == "bonus" %}active{% endif %}" href="{% url 'personal:bonus' %}">Мои бонусы</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'accounts:logout' %}">Выход</a>
+</li>

@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     {% include 'includes/meta_tags.html'%}
-    <title>{% block title %}Отчетность МАКС-Жизнь{% endblock %}</title>
+    <title>{% block title %}{{ company.name }}{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ company.favicon.url }}">
+    <meta name="description" content={% block seo_description %}''{% endblock %}>
+    <meta name="keywords" content={% block seo_keywords %}''{% endblock %}>
   </head>
   <body>
     <header>

@@ -1,0 +1,79 @@
+{% extends 'personal/personal_base.html' %}
+
+{% block title %}{{ company.name }} - Личный кабинет{% endblock %}
+{% block personal_content %}
+{#  <div class="row ms-5 fs-6">#}
+{#    <table class="table">#}
+{#      <thead>#}
+{#        <tr>#}
+{#          {% load user_filters %}#}
+{#          <th scope="col">#</th>#}
+{#          <th scope="col">{{ 'house'|verbose_name }}</th>#}
+{#          <th scope="col">{{ 'start_date'|verbose_name }}</th>#}
+{#          <th scope="col">{{ 'start_time'|verbose_name }}</th>#}
+{#          <th scope="col">{{ 'end_date'|verbose_name }}</th>#}
+{#          <th scope="col">{{ 'end_time'|verbose_name }}</th>#}
+{#          <th scope="col">{{ 'count_guests'|verbose_name }}</th>#}
+{#        </tr>#}
+{#      </thead>#}
+{#      <tbody>#}
+{#        <tr>#}
+{#          {% if reserves %}#}
+{#            {% for reserve in reserves %}#}
+{#              <th scope="row">{{ forloop.counter }}</th>#}
+{#              <td>{{ reserve.house.name }}</td>#}
+{#              <td>{{ reserve.start_date }}</td>#}
+{#              <td>{{ reserve.start_time }}</td>#}
+{#              <td>{{ reserve.end_date }}</td>#}
+{#              <td>{{ reserve.end_time }}</td>#}
+{#              <td>{{ reserve.count_guests }}</td>#}
+{#            {% endfor %}#}
+{#          {% else %}#}
+{#            <td colspan="7" class="text-center">У вас нет текущих бронирований</td>#}
+{#          {% endif %}#}
+{#        </tr>#}
+{#      </tbody>#}
+{#    </table>#}
+    <div class="row">
+      {% if reserves %}
+        {% for reserve in reserves %}
+          <div class="col-12 col-lg-6 card__reserve d-flex align-items-stretch">
+            <div class="card">
+              <img src="{{ reserve.house.photo_main.image_small.url }}" class="card-img-top" alt="...">
+              <div class="card-header">
+                {{ reserve.house.name }}
+              </div>
+              {% load static %}
+              <div class="card-body {% if reserve.paid %}paid{% endif %}">
+                <p><span class="fw-bold">Начало</span><br>{{ reserve.start_date }} {{ reserve.start_time }}</p>
+                <p><span class="fw-bold">Окончание</span><br>{{ reserve.end_date }} {{ reserve.end_time }}</p>
+                <p><span class="fw-bold">Количество гостей</span><br>{{ reserve.count_guests }}</p>
+              </div>
+              <div class="card-footer fw-bold">
+                <div class="row">
+                  <div class="col-7">
+                    Сумма: {{ reserve.cost }} руб.
+                  </div>
+                  <div class="col-5 d-flex justify-content-end">
+                    {% if reserve.paid %}
+                      <a class="btn btn-success" href="#" style="pointer-events: none">Оплачено</a>
+                    {% else %}
+                      <a class="btn btn-danger" href="#">Оплатить</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-success alert__reserve" role="alert">
+          На текущий момент у вас нет активных бронирований
+        </div>
+      {% endif %}
+    </div>
+{#  </div>#}
+
+
+
+{% endblock %}

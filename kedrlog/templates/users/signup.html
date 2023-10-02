@@ -1,0 +1,12 @@
+{% extends "page_form.html" %}
+{% block title %}Зарегистрироваться{% endblock %}
+{% block include_header %}
+  {% include 'includes/content_page_header.html' with subtitle_h2='Регистрация' %}
+{% endblock %}
+{% block card_footer %}
+  <div class="card-footer">
+    <div class="col d-flex align-items-end justify-content-end">
+      <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - Личный кабинет{% endblock %}
+{% block content %}
+  {% with 'Добро пожаловать, '|add:user.first_name|add:' '|add:user.last_name as welcome %}
+    {% include 'includes/content_page_header.html' with subtitle_h2='Личный кабинет' subtitle_span=welcome %}
+  {% endwith %}
+  <div class="container mb-5">
+    <div class="row">
+      {% include 'personal/personal_left_menu.html' %}
+      <div class="col-12 col-md-9 text-dark">
+        {% block personal_content %}
+          <h2>Добро пожаловать {{ user.first_name }}</h2>
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

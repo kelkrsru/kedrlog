@@ -1,0 +1,33 @@
+{% extends 'personal/personal_base.html' %}
+
+{% block title %}{{ company.name }} - Личный кабинет{% endblock %}
+{% block personal_content %}
+  <div class="row ms-5 fs-5">
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Ваше имя:</th>
+          <td>{{ user.first_name }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Ваша фамилия:</th>
+          <td>{{ user.last_name }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Ваш адрес электронной почты:</th>
+          <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Дата регистрации:</th>
+          <td>{{ user.date_joined }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Последний вход:</th>
+          <td>{{ user.last_login }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+

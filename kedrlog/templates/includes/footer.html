@@ -1,7 +1,26 @@
-<div class="text-center p-3 footer mt-5">
-  © {{ year }} Copyright:
-  <a
-          class="text-dark"
-          href="#">Кириллов Евгений
-  </a>
+<div class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-7">
+        <div class="footer__logo">
+          <a href="{% url 'mainpage:index' %}">
+            <img src="{{ company.logo_footer.url }}" alt="logo">
+          </a>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="footer__contacts-wrapper">
+          <ul class="footer__menu-list">
+            <li class="footer__menu-list-item"><a href="{% url 'rules' %}">Правила аренды бани</a></li>
+          </ul>
+          <div class="clearfix"></div>
+          <div class="footer__contacts-title footer__contacts-title-phone">Контактный телефон</div>
+          {% load user_filters %}
+          <div class="footer__contacts-phone"><a href="tel:{{ company.phone|clear_phone }}">{{ company.phone }}</a></div>
+          <div class="footer__contacts-title footer__contacts-title-address">Адрес</div>
+          <div class="footer__contacts-address">{{ company.address }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

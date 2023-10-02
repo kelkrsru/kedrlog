@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - Главная{% endblock %}
+{% block content %}
+  {% load static %}
+  <div class="background-video">
+    <video autoplay="" loop="" muted="">
+      <source src="{{ content_block_main.video_mp4.url }}" type="video/mp4">
+    </video>
+    <div class="background-video__overlay">
+      <div class="background-video__intro_text">
+        <p>{{ content_block_main.second_header }}</p>
+        <span class="background-video__intro_name">{{ content_block_main.header }}</span>
+      </div>
+    </div>
+  </div>
+
+  {% include 'includes/content_page_header.html' with subtitle_h2=content_block_booking.header subtitle_span=content_block_booking.second_header page='main' %}
+  <div class="house-selector house-selector__desktop">
+    <div class="house-selector__inner">
+      {% for house in content_block_booking.houseshowbooking_set.all %}
+        <div onclick=openModal('house_{{ house.house.pk }}') class="house-selector__item"
+             style="top: {{ house.position_top }}%; left: {{ house.position_left }}%"></div>
+        <div id='house_{{ house.house.pk }}' class="house-selector__modal" style="display: none;">
+          <div class="house-selector__item-wrapper hidden">
+            <div class="house-selector__modal-img">
+              <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
+            </div>
+            <div class="house-selector__modal-title">{{ house.house.name }}</div>
+            <ul class="house-selector__modal-list">
+              <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
+              <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
+              <li class="house-selector__modal-list-item">Гости: <b>до {{ house.house.max_guests }} человек</b></li>
+              <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
+            </ul>
+            <div class="house-selector__modal-divider"></div>
+            <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
+              {% load user_filters %}
+              {{ min_cost|get_item:house.house.pk }}
+
+            </span> руб./час
+            </div>
+
+            <div class="house-selector__modal-btn-wrapper">
+              <div class="house-selector__modal-btn-flex-section">
+                <button class="btn btn-success">Забронировать</button>
+              </div>
+              <span class="house-selector__modal-btn-flex-section">
+                {% for item in house.house.gallery_items.all %}
+                  {% if forloop.counter == 1 %}
+                    <a href="{{ item.image_large.url }}" class="btn btn-success" data-toggle="lightbox"
+                       data-gallery="gallery_house_{{ house.house.pk }}">Посмотреть</a>
+                  {% else %}
+                    <a href="{{ item.image_large.url }}" data-toggle="lightbox" data-gallery="gallery_house_{{ house.house.pk }}" style="display: none"></a>
+                  {% endif %}
+                {% endfor %}
+              </span>
+            </div>
+          </div>
+        </div>
+        {#        <div class="house-selector__item" data-id="<?= $id ?>" style="top: 45%; left: 23%"></div>#}
+        {#        <div class="house-selector__item" data-id="<?= $id ?>" style="top: 47%; left: 37%"></div>#}
+        {#        <div class="house-selector__item" data-id="<?= $id ?>" style="top: 51%; left: 55%"></div>#}
+        {#        <div class="house-selector__item" data-id="<?= $id ?>" style="top: 55%; left: 79%"></div>#}
+      {% endfor %}
+      <img src="{{ content_block_booking.background_image.url }}" class="house-selector__img" alt="house choose" onclick="openModal(0)"/>
+    </div>
+  </div>
+
+  <div class="house-selector house-selector__mobile">
+    {% for house in content_block_booking.houseshowbooking_set.all %}
+      <div class="house-selector__item-wrapper hidden house-selector__item-id-100">
+        <div class="house-selector__modal-img">
+            <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
+        </div>
+        <div class="house-selector__modal-title">{{ house.house.name }}</div>
+        <ul class="house-selector__modal-list">
+            <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
+            <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
+            <li class="house-selector__modal-list-item">Гости: <b>до {{ house.house.max_guests }} человек</b></li>
+            <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
+        </ul>
+        <div class="house-selector__modal-divider"></div>
+        <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">2900</span> руб./час</div>
+        <div class="house-selector__modal-btn-wrapper">
+          <div class="house-selector__modal-btn-flex-section">
+              <button class="btn btn-success">Забронировать</button>
+          </div>
+          <span class="order__gallery house-selector__modal-btn-flex-section">
+            {% for item in house.house.gallery_items.all %}
+              {% if forloop.counter == 1 %}
+                <a href="{{ item.image_large.url }}" class="btn btn-success" data-toggle="lightbox"
+                   data-gallery="gallery_mobile_house_{{ house.house.pk }}">Посмотреть</a>
+              {% else %}
+                <a href="{{ item.image_large.url }}" data-toggle="lightbox" data-gallery="gallery_mobile_house_{{ house.house.pk }}" style="display: none"></a>
+              {% endif %}
+            {% endfor %}
+          </span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% include 'includes/content_page_header.html' with subtitle_h2=content_block_infra.header subtitle_span=content_block_infra.second_header page='main' %}
+  <div class="content-page-background">
+    <div class="container">
+      <div class="row">
+        {% for item in content_block_infra.items.all %}
+          {% url item.link as item_link %}
+          {% include 'includes/round_menu_item.html' with item_text=item.name item_a_href=item_link item_img_src=item.image.url item_img_alt=item.image_alt %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% include 'includes/content_page_header.html' with subtitle_h2=content_block_service.header subtitle_span=content_block_service.second_header page='main' %}
+  <div class="content-page-background">
+    <div class="container">
+      <div class="row">
+        {% for item in content_block_service.items.all %}
+          {% url item.link as item_link %}
+          {% include 'includes/round_menu_item.html' with item_text=item.name item_a_href=item_link item_img_src=item.image.url item_img_alt=item.image_alt %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% include 'includes/content_page_header.html' with subtitle_h2=content_block_yandex_map.header subtitle_span=content_block_yandex_map.second_header page='main' %}
+  <div style="position:relative;overflow:hidden;">
+    <iframe src="{{ content_block_yandex_map.link }}" width="100%" height="400px" frameborder="1" allowfullscreen="true"
+            style="position:relative;"></iframe>
+  </div>
+{% endblock %}
+{% block user_scripts %}
+  <script>
+      function openModal(house_id) {
+          const houses = document.getElementsByClassName('house-selector__modal');
+          for (let i = 0; i < houses.length; i++) {
+              if (houses[i].id === house_id) {
+                  if (houses[i].style.display === 'none') {
+                      houses[i].style.display = 'block';
+                  } else {
+                      houses[i].style.display = 'none';
+                  }
+              } else {
+                  houses[i].style.display = 'none';
+              }
+          }
+      }
+  </script>
+{% endblock %}
+
+

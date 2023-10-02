@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if text_content.seo_title %}{{ text_content.seo_title }}{% else %}{{ company.name }} - {{ text_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ text_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ text_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=text_content.header subtitle_span=text_content.second_header %}
+  {% include 'includes/text_content.html' with text=text_content.text %}
+{% endblock %}
+
+

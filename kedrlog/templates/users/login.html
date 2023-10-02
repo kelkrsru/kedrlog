@@ -1,0 +1,16 @@
+{% extends "page_form.html" %}
+{% block title %}Войти{% endblock %}
+{% block include_header %}
+  {% include 'includes/content_page_header.html' with subtitle_h2='Вход' %}
+{% endblock %}
+{% block card_footer %}
+  <div class="card-footer">
+    <div class="col d-flex align-items-end justify-content-end">
+      <a href="{% url 'accounts:signup' %}" class="btn btn-primary me-3">Зарегистрироваться</a>
+      <button type="submit" class="btn btn-success">Войти</button>
+    </div>
+    <div class="col d-flex align-items-end justify-content-end mt-3">
+      <a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a>
+    </div>
+  </div>
+{% endblock %} 

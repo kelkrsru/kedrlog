@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if gallery.seo_title %}{{ gallery.seo_title }}{% else %}{{ company.name }} - {{ gallery.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ gallery.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ gallery.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=gallery.header subtitle_span=gallery.second_header %}
+  {% include 'includes/gallery.html' with items=gallery.items.all %}
+{% endblock %}

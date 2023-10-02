@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+  {% block include_header %}
+    {% include 'includes/content_page_header.html' with subtitle_h2='Вход' %}
+  {% endblock %}
+  <div class="content__inner-page">
+    <div class="container">
+      <div class="row mt-3 justify-content-center">
+        <div class="col-12 col-md-6 card">
+          {% load user_filters %}
+          {% if form.errors %}
+            {% for field in form %}
+              {% for error in field.errors %}
+                <div class="alert alert-danger mt-3">
+                  {{ field.label }} {{ error|escape }}
+                </div>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger mt-3">
+                {{ error|escape }}
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="post" action="{{ action_url }}">
+            <div class="card-body">
+              {% csrf_token %}
+              {% for field in form %}
+                <div class="form-group col">
+                  <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                      {% if field.field.required %}
+                        <span class="required text-danger">*</span>
+                      {% endif %}
+                  </label>
+                  {% if field|fieldtype == 'Select' %}
+                    {{ field|addclass:'form-select' }}
+                  {% elif field|widgettype == 'CheckboxInput' %}
+                    <div class="form-check form-switch mt-1">
+                      {{ field|addclass:'form-check-input' }}
+                    </div>
+                  {% else %}
+                    {{ field|addclass:'form-control' }}
+                  {% endif %}
+                    {% if field.help_text %}
+                      <small id="{{ field.id_for_label }}-help" class="form-text text-muted">
+                        {{ field.help_text|safe }}
+                      </small>
+                    {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+
+            {% block card_footer %}
+              <div class="card-footer">
+                <div class="col d-flex align-items-end justify-content-end">
+                  <button type="submit" class="btn btn-success">{{ btn_success_name }}</button>
+                </div>
+              </div>
+            {% endblock %}
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

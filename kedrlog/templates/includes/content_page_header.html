@@ -1,0 +1,18 @@
+<div class="container">
+  {% if page == 'main' %}
+    <div class="content-page-header">
+  {% else %}
+    <div class="content-page-header p-5">
+  {% endif %}
+    <span class="content-page-header__venik content-page-header__venik-left"></span>
+    <div class="content-page-header__title">
+      <span class="content-page-header__pattern"></span>
+      <span class="content-page-header__subtitle">
+        <h2>{{ subtitle_h2 }}</h2>
+        <span class="content-page-header__subtitle-subtext">{{ subtitle_span }}</span>
+      </span>
+      <span class="content-page-header__pattern"></span>
+    </div>
+    <span class="content-page-header__venik content-page-header__venik-right"></span>
+  </div>
+</div>
