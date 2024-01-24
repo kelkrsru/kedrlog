@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - Оформление заказа{% endblock %}
+{% block content %}
+  {% load user_filters %}
+  {% include 'includes/modals.html' %}
+  {% include 'includes/content_page_header.html' with subtitle_h2='Бронирование' subtitle_span='Оформление заказа' %}
+
+  <div class="container content-page-order">
+    <p>
+      На сегодняшний день возможность оформления бронирования закрыта. Мы работаем и скоро вновь откроем возможность выбрать вашу любимую парную!<br>
+      Вы можете узнать все условия и забронировать парную по телефону <a href="tel:{{ company.phone|clear_phone }}">{{ company.phone }}</a><br>
+      Благодарим вас за понимание, будем рады видеть в нашем банном комплексе {{ company.name }}.
+    </p>
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+{% endblock %}
+

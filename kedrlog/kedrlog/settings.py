@@ -11,6 +11,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False if os.getenv('DEBUG') == 'False' else True
 
+PRODUCTION = False if os.getenv('PRODUCTION') == 'False' else True
+
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='').split(' ')
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', default='').split(' ')
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'staticpages',
     'ckeditor',
     'personal',
+    'order',
     # 'admin_reorder',
 ]
 
@@ -65,7 +68,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kedrlog.wsgi.application'
 
-if DEBUG:
+if not PRODUCTION:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -77,8 +80,8 @@ else:
         'default': {
             'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.sqlite3'),
             'NAME': os.getenv('DB_NAME', default=os.path.join(BASE_DIR, 'db.sqlite3')),
-            'USER': os.getenv('POSTGRES_USER', default='test'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='test'),
+            'USER': os.getenv('DB_USER', default='test'),
+            'PASSWORD': os.getenv('DB_PASSWORD', default='test'),
             'HOST': os.getenv('DB_HOST', default='localhost'),
             'PORT': os.getenv('DB_PORT', default='5432')
         }
@@ -112,13 +115,25 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-# STATIC_ROOT = os.getenv('PATH_STATIC_ROOT')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = 'media/'
-# MEDIA_ROOT = [os.path.join(BASE_DIR, 'media')]
+if PRODUCTION:
+    STATIC_ROOT = os.getenv('PATH_STATIC_ROOT')
+    MEDIA_ROOT = os.getenv('PATH_MEDIA_ROOT')
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+if not PRODUCTION:
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST')
+    EMAIL_PORT = os.getenv('EMAIL_PORT')
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_SSL = False if os.getenv('EMAIL_USE_SSL') == 'False' else True
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -127,6 +142,7 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 ADMIN_REORDER = (
     {'label': 'Основные настройки сайта', 'app': 'core', 'models': [
         'core.Company',
+        'core.SocialNetworks',
     ]},
     {'label': 'Структура Главной страницы', 'app': 'mainpage', 'models': [
         'mainpage.ContentBlockMain',
@@ -143,16 +159,27 @@ ADMIN_REORDER = (
         'staticpages.TextContentRules',
         'staticpages.TextContentAccessories',
         'staticpages.TextContentRent',
+        'staticpages.TextContentCorporate',
+        'staticpages.ContentPrice',
+        'staticpages.ContentSpa',
         'common.GalleryItem',
     ]},
     {'label': 'Ресурсы', 'app': 'core', 'models': [
         'core.House',
+        'core.AdditionalFeatures',
         'core.Rate',
+        'core.AdditionalServices',
+        'core.SpaServices',
+        'core.PriceForSpaServices',
+        'core.WeekendDays',
+        'core.SettingsSite',
+        'core.SettingsBitrix24',
     ]},
     {'label': 'Бронирование', 'app': 'core', 'models': [
         'core.Reserve',
     ]},
     {'label': 'Пользователи', 'app': 'users', 'models': [
         'users.User',
+        'auth.Group',
     ]},
 )

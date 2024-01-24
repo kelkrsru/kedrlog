@@ -1,0 +1,11 @@
+{% load static %}
+
+{% autoescape off %}
+Привет {{ user.get_full_name }},
+
+Вы получили это письмо, потому что сделали заказ на сайте Кедровый лог:
+
+Ваш пользователь: {{ user.username }}
+Ваш пароль: {{ password }}
+
+{% endautoescape %}

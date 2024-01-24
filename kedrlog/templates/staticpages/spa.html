@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if spa_content.seo_title %}{{ spa_content.seo_title }}{% else %}{{ company.name }} - {{ spa_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ spa_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ spa_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=spa_content.header subtitle_span=spa_content.second_header %}
+
+{% load user_filters %}
+  <div class="container price-content mb-5">
+    <div class="row flex-row justify-content-center">
+      {% for service in spa_content.spa_service.all %}
+        <div class="col-12 col-md-6 mt-3 d-flex">
+          <div class="card price-card flex-fill">
+            <img src="{{ service.header_image.url }}" class="card-img-top" alt="price">
+            <div class="card-body">
+              <h5 class="card-title">Парение "{{ service.name }}"</h5>
+              <div class="order-page-div"><span></span></div>
+              <p class="card-text">{{ service.description }}</p>
+              <p class="card-text">{{ service.include|safe }}</p>
+            </div>
+            <div class="card-footer text-end">
+              <div class="form-floating">
+                <select class="form-select" name="price-max" id="price-max-{{ service.id }}" onchange="FillDuration(this)">
+                  <option value="0" selected>Не выбрано</option>
+                  {% for price in service.price.all|distinct:'max_guest' %}
+                    <option value="{{ price.max_guest }}">до {{ price.max_guest }} включительно</option>
+                  {% endfor %}
+                </select>
+                <label for="price-max-{{ service.id }}">Выберите количество человек</label>
+              </div>
+              <div class="form-floating">
+                <select class="form-select mt-3" name="price-duration" id="price-duration-{{ service.id }}" disabled onchange="GetPrice(this)">
+                  <option value="0">Не выбрано</option>
+                </select>
+                <label for="price-duration-{{ service.id }}">Выберите продолжительность</label>
+              </div>
+              <p id="price-price-{{ service.id }}" class="card-text order-page-total-price-value mt-3"></p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+      function FillDuration(object) {
+          const spa_service_id = object.id.split('-')[2];
+          let spa_duration_select = document.querySelector('#price-duration-' + spa_service_id);
+          let price_p = document.querySelector("#price-price-" + spa_service_id);
+          removeAll(spa_duration_select);
+          addOptions(spa_duration_select, "0", "Не выбрано");
+          price_p.textContent = " ";
+          if (object.value === "0") {
+              spa_duration_select.setAttribute('disabled', 'true');
+              return 0;
+          }
+
+          {% for service in spa_content.spa_service.all %}
+              if ("{{ service.id }}" === spa_service_id) {
+                  {% for price in service.price.all %}
+                      if (object.value === "{{ price.max_guest }}") {
+                          addOptions(spa_duration_select, "{{ price.price }}", "{{ price.duration }} мин.");
+                      }
+                  {% endfor %}
+              }
+          {% endfor %}
+
+          spa_duration_select.removeAttribute('disabled');
+      }
+
+      function GetPrice(object) {
+          const spa_service_id = object.id.split('-')[2];
+          let price_p = document.querySelector("#price-price-" + spa_service_id);
+          price_p.textContent = "Стоимость: " + object.value.split(',')[0] + " ₽";
+      }
+
+      function removeAll(selectBox) {
+          while (selectBox.options.length > 0) {
+              selectBox.remove(0);
+          }
+      }
+
+      function addOptions(selectBox, value, textContent) {
+          let option = document.createElement('option');
+          option.value = value;
+          option.textContent = textContent;
+          selectBox.appendChild(option);
+      }
+  </script>
+{% endblock %}

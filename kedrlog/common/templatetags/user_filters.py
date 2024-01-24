@@ -40,8 +40,18 @@ def to_int(value):
 
 
 @register.filter
+def distinct(queryset, field_name):
+    return queryset.values(field_name).distinct()
+
+
+@register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def equal_date(date_one, date_two):
+    return date_one <= date_two
 
 
 @register.simple_tag

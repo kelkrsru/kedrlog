@@ -10,3 +10,15 @@ class User(AbstractUser):
         null=True,
         blank=True
     )
+
+    phone = models.CharField(
+        verbose_name='Телефон',
+        max_length=20,
+        unique=True
+    )
+
+    id_b24 = models.PositiveIntegerField(
+        verbose_name='ID пользователя в Б24',
+        null=True,
+        blank=True,
+    )

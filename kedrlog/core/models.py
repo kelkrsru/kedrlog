@@ -1,7 +1,14 @@
+from pprint import pprint
+from urllib.parse import urlparse
+
+from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
+from django.utils import timezone
+
 from common.models import CreatedModel, GalleryItem
+from bitrix24 import Bitrix24
 
 User = get_user_model()
 
@@ -33,19 +40,25 @@ class Company(CreatedModel):
         verbose_name='Файл логотипа компании в шапке',
         help_text='Файл логотипа компании в шапке в формате png, рекомендованный размер 60x60 px с прозрачным фоном',
         blank=True,
-        upload_to='media/img/logo/'
+        upload_to='img/logo/'
     )
     logo_footer = models.ImageField(
         verbose_name='Файл логотипа компании в подвале',
         help_text='Файл логотипа компании в подвале в формате png, рекомендованный размер 60x60 px с прозрачным фоном',
         blank=True,
-        upload_to='media/img/logo/'
+        upload_to='img/logo/'
     )
     favicon = models.ImageField(
         verbose_name='Файл favicon',
         help_text='Файл favicon в формате ico',
         blank=True,
-        upload_to='media/img/favicon/'
+        upload_to='img/favicon/'
+    )
+    social_networks = models.ManyToManyField(
+        'SocialNetworks',
+        verbose_name='Социальные сети',
+        related_name='company_social_networks',
+        blank=True
     )
 
     def save(self, *args, **kwargs):
@@ -63,6 +76,10 @@ class Company(CreatedModel):
 
 class House(CreatedModel):
     """Класс Парная."""
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
     name = models.CharField(
         max_length=100,
         verbose_name='Наименование',
@@ -89,7 +106,7 @@ class House(CreatedModel):
         blank=True
     )
     cleaning = models.PositiveSmallIntegerField(
-        verbose_name='Время на уборку в минутах',
+        verbose_name='Время на уборку в часах',
         help_text='Если 0, то уборка отсутствует',
         default=0
     )
@@ -104,6 +121,17 @@ class House(CreatedModel):
         verbose_name='Элементы галереи',
         related_name='house_gallery_item'
     )
+    additional_features = models.ManyToManyField(
+        'AdditionalFeatures',
+        verbose_name='Дополнительные характеристики',
+        related_name='house_additional_features',
+    )
+    id_b24 = models.PositiveSmallIntegerField(
+        verbose_name='ID ресурса бронирования в Б24',
+        help_text='ID ресурса бронирования в Битрикс24',
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return self.name
@@ -113,36 +141,29 @@ class House(CreatedModel):
         verbose_name_plural = 'Парные'
 
 
-class TimeCost(CreatedModel):
-    """Класс интервал - цена."""
-    start_time = models.TimeField(
-        verbose_name='Начальное время',
-        help_text='Граница включена в тариф'
+class AdditionalFeatures(CreatedModel):
+    """Дополнительные характеристики для парных."""
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Наименование',
     )
-    end_time = models.TimeField(
-        verbose_name='Конечное время',
-        help_text='Граница НЕ включена в тариф'
+    description = models.CharField(
+        max_length=255,
+        verbose_name='Описание',
+        help_text='Выводится на странице бронирования'
     )
-    interval = models.PositiveSmallIntegerField(
-        verbose_name='Интервал тарификации, мин',
-        validators=[MinValueValidator(0, 'Значение не должно быть меньше 0'),
-                    MaxValueValidator(180, 'Значение не должно быть больше 180')],
-        default=60
-    )
-    cost = models.DecimalField(
-        verbose_name='Стоимость, руб.',
-        help_text='Стоимость за один интервал тарификации',
-        max_digits=10,
-        decimal_places=2
+    icon = models.ImageField(
+        verbose_name='Иконка',
+        help_text='Иконка в формате png 64*64 px',
+        upload_to='img/houses/icons/'
     )
 
     def __str__(self):
-        return f'{str(self.start_time)} - {str(self.end_time)} - {str(self.cost)} руб. - {str(self.interval)} мин.'
+        return self.name
 
     class Meta:
-        verbose_name = 'Интервал тарификации'
-        verbose_name_plural = 'Интервалы тарификации'
-        unique_together = ['start_time', 'end_time', 'cost', 'interval']
+        verbose_name = 'Дополнительная характеристика'
+        verbose_name_plural = 'Дополнительные характеристики'
 
 
 class Rate(CreatedModel):
@@ -167,11 +188,64 @@ class Rate(CreatedModel):
         related_name='rate_house',
         on_delete=models.CASCADE
     )
-    rate = models.ManyToManyField(
-        TimeCost,
-        verbose_name='Интервалы тарификации',
-        related_name='rate_time_cost',
+    price = models.DecimalField(
+        verbose_name='Цена',
+        help_text='Цена за 1 час в обычный день пн, вт, ср, чт',
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
     )
+    price_weekend = models.DecimalField(
+        verbose_name='Цена выходного дня',
+        help_text='Цена за 1 час в выходной день пт, сб, вс и праздники',
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+    )
+    min_time = models.PositiveSmallIntegerField(
+        verbose_name='Минимальное время парения',
+        help_text='Минимальное время парения в часах',
+        default=3
+    )
+    guests_in_price = models.PositiveSmallIntegerField(
+        verbose_name='Количество гостей, включенных в стоимость',
+        default=6
+    )
+    additional_guest_price = models.DecimalField(
+        verbose_name='Доплата за дополнительного гостя',
+        help_text='Доплата за дополнительного гостя за все время',
+        max_digits=10,
+        decimal_places=2,
+        default=1000.00,
+    )
+    id_rent_in_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара аренды в каталоге Битрикс24',
+        blank=True,
+        null=True
+    )
+    id_rent_weekend_in_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара аренды выходного дня в каталоге Битрикс24',
+        blank=True,
+        null=True
+    )
+    id_additional_guest_in_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара дополнительного гостя в каталоге Битрикс24',
+        blank=True,
+        null=True
+    )
+
+    @staticmethod
+    def is_day_of(date):
+        """Проверить день на праздничный/выходной."""
+        if date.weekday() in [4, 5, 6] or WeekendDays.objects.filter(date=date):
+            return True
+        return False
+
+    def get_price(self, date):
+        """Получить цену, исходя из буднего/праздничного/выходного дня."""
+        if self.is_day_of(date):
+            return self.price_weekend
+        return self.price
 
     def save(self, *args, **kwargs):
         if self.active:
@@ -188,17 +262,14 @@ class Rate(CreatedModel):
 
 class Reserve(CreatedModel):
     """Класс Бронирование."""
-    start_date = models.DateField(
-        verbose_name='Дата начала бронирования',
+    start_date_time = models.DateTimeField(
+        verbose_name='Дата и время начала бронирования',
     )
-    start_time = models.TimeField(
-        verbose_name='Время начала бронирования',
+    end_date_time = models.DateTimeField(
+        verbose_name='Дата и время окончания бронирования',
     )
-    end_date = models.DateField(
-        verbose_name='Дата окончания бронирования',
-    )
-    end_time = models.TimeField(
-        verbose_name='Время окончания бронирования',
+    duration = models.PositiveSmallIntegerField(
+        verbose_name='Продолжительность бронирования',
     )
     user = models.ForeignKey(
         User,
@@ -212,13 +283,19 @@ class Reserve(CreatedModel):
     )
     count_guests = models.PositiveSmallIntegerField(
         verbose_name='Количество человек',
-        validators=[MinValueValidator(1, 'Количество людей не может быть меньше 0 или 0'), ],
+        validators=[MinValueValidator(1, 'Количество человек не может быть меньше 0 или 0'), ],
     )
     cost = models.DecimalField(
         verbose_name='Сумма',
         max_digits=10,
         decimal_places=2,
         default=0
+    )
+    additional_services = models.ManyToManyField(
+        'AdditionalServices',
+        verbose_name='Дополнительные услуги',
+        through='ReserveServices',
+        blank=True,
     )
     paid = models.BooleanField(
         verbose_name='Оплачено',
@@ -228,12 +305,404 @@ class Reserve(CreatedModel):
         verbose_name='Отправлено в Битрикс24',
         default=False,
     )
+    deal_id_b24 = models.PositiveIntegerField(
+        verbose_name='ID сделки в Битрикс24',
+        help_text='ID сделки в Битрикс24',
+        unique=True,
+        blank=True,
+        null=True
+    )
+
+    @classmethod
+    def _get_start_busy(cls, reserve_date, reserve_house):
+        """Метод, который формирует множество из времени начало парения, уже занятых за переданную дату."""
+        start_date_time_busy = set()
+        tz = timezone.get_current_timezone()
+        start_date_interval = timezone.datetime.combine(reserve_date - timezone.timedelta(days=1),
+                                                        timezone.datetime.min.time(), tz)
+        end_date_interval = timezone.datetime.combine(reserve_date + timezone.timedelta(days=1),
+                                                      timezone.datetime.max.time(), tz)
+        reserve_date_interval = [start_date_interval, end_date_interval]
+
+        reserves = cls.objects.filter(house=reserve_house, start_date_time__range=reserve_date_interval)
+        for reserve in reserves:
+            start_date_time = timezone.make_naive(reserve.start_date_time, tz)
+            duration = reserve.duration
+            for x in range(duration + reserve_house.cleaning):
+                date_time_add = start_date_time + timezone.timedelta(hours=x)
+                start_date_time_busy.add(date_time_add)
+
+        webhook = SettingsBitrix24.objects.get(active=True).webhook
+        b24 = Bitrix24(webhook)
+        bookings = b24.callMethod('calendar.resource.booking.list',
+                                  filter={"resourceTypeIdList": [reserve_house.id_b24],
+                                          "from": start_date_interval.strftime('%y-%m-%d'),
+                                          "to": end_date_interval.strftime('%y-%m-%d')})
+        for booking in bookings:
+            start_date_time = timezone.datetime.strptime(booking.get("DATE_FROM"), "%d.%m.%Y %H:%M:%S")
+            end_date_time = timezone.datetime.strptime(booking.get("DATE_TO"), "%d.%m.%Y %H:%M:%S")
+            while start_date_time < end_date_time + timezone.timedelta(hours=reserve_house.cleaning):
+                start_date_time_busy.add(start_date_time)
+                start_date_time += timezone.timedelta(hours=1)
+
+        return start_date_time_busy
+
+    @classmethod
+    def _get_start_allow(cls, start_date_time_busy, duration, house_cleaning, reserve_date):
+        """Метод, который формирует множество из времени начало парения, разрешенных для бронирования."""
+        min_interval = timezone.timedelta(hours=(duration + house_cleaning))
+        reserve_date = timezone.datetime.combine(reserve_date - timezone.timedelta(days=1),
+                                                 timezone.datetime.min.time())
+        date_time_range_3days = {reserve_date + timezone.timedelta(hours=i) for i in range(72)}
+
+        start_date_time_allow = date_time_range_3days.difference(start_date_time_busy)
+        start_date_time_allow = sorted(start_date_time_allow)
+        i = 0
+        while i < len(start_date_time_allow):
+            reserve_interval = [start_date_time_allow[i] + timezone.timedelta(hours=x) for x in range(duration + house_cleaning)]
+            j = False
+            for date_time in reserve_interval:
+                if date_time in start_date_time_busy:
+                    start_date_time_allow.pop(i)
+                    j = True
+                    break
+            if not j:
+                i += 1
+
+        return set(start_date_time_allow)
+
+    @staticmethod
+    def _add_start_busy_not_min_intervals(start_date_time_busy, duration, house_cleaning):
+        """Метод, который добавляет начало парения в занятое, если меньше минимального промежутка."""
+
+        min_interval = timezone.timedelta(hours=(duration + house_cleaning))
+        start_date_time_busy = sorted(start_date_time_busy)
+        start_date_time_busy_temp = list()
+
+        for i in range(len(start_date_time_busy) - 1):
+            delta = start_date_time_busy[i + 1] - start_date_time_busy[i]
+            if (delta <= min_interval) and (delta != timezone.timedelta(hours=1)):
+                j = start_date_time_busy[i + 1]
+                while j != start_date_time_busy[i] + timezone.timedelta(hours=1):
+                    j -= timezone.timedelta(hours=1)
+                    start_date_time_busy_temp.append(j)
+        start_date_time_busy += start_date_time_busy_temp
+
+        return set(start_date_time_busy)
+
+    @classmethod
+    def get_start_busy_and_allow(cls, reserve_date, reserve_house, duration):
+        start_date_time_busy = cls._get_start_busy(reserve_date, reserve_house)
+        start_date_time_busy_temp = cls._add_start_busy_not_min_intervals(start_date_time_busy, duration,
+                                                                          reserve_house.cleaning)
+        start_date_time_allow = cls._get_start_allow(start_date_time_busy_temp, duration, reserve_house.cleaning,
+                                                     reserve_date)
+
+        return start_date_time_busy, start_date_time_allow
+
+    @classmethod
+    def check_reserve(cls, start_date_time, reserve_house, duration):
+        """Метод проверки времени на занятость."""
+        reserve_date = start_date_time.date()
+        start_date_time_busy = cls._get_start_busy(reserve_date, reserve_house)
+        reserve_interval = [start_date_time + timezone.timedelta(hours=x) for x in range(duration +
+                                                                                         reserve_house.cleaning)]
+
+        for date_time in reserve_interval:
+            date_time = date_time.replace(tzinfo=None)
+            if date_time in start_date_time_busy:
+                return False
+        return True
 
     def __str__(self):
-        return f'Бронирование {self.house.name} с {self.start_date} {self.start_time} по {self.end_date} ' \
-               f'{self.end_time}'
+        return f'Бронирование {self.house.name} с {self.start_date_time} по {self.end_date_time}'
 
     class Meta:
         verbose_name = 'Бронирование'
         verbose_name_plural = 'Бронирования'
-        unique_together = ['start_date', 'start_time', 'end_date', 'end_time', 'house']
+
+
+class AdditionalServices(CreatedModel):
+    """Класс Дополнительные услуги."""
+
+    class Measure(models.TextChoices):
+        PIECE = 'piece', 'шт.'
+        SERVICE = 'service', 'усл.'
+        HOUR = 'hour', 'час'
+
+        __empty__ = 'Не выбрано'
+
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
+    name = models.CharField(
+        verbose_name='Наименование',
+        max_length=255
+    )
+    description = models.CharField(
+        verbose_name='Описание',
+        max_length=255,
+        blank=True
+    )
+    price = models.DecimalField(
+        verbose_name='Цена',
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+    )
+    measure = models.CharField(
+        verbose_name='Единицы измерения',
+        max_length=20,
+        choices=Measure.choices,
+        default=Measure.__empty__
+    )
+    id_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара/услуги',
+        help_text='ID товара/услуги в каталоге Битрикс24',
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Дополнительная услуга'
+        verbose_name_plural = 'Дополнительные услуги'
+
+
+class SpaServices(CreatedModel):
+    """Класс Программы парения."""
+
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
+    name = models.CharField(
+        verbose_name='Наименование',
+        max_length=255
+    )
+    description = models.CharField(
+        verbose_name='Описание',
+        max_length=2048,
+        blank=True
+    )
+    include = RichTextField(
+        verbose_name='Программа включает',
+        help_text='Что вас ждет в программе парения'
+    )
+    price = models.ManyToManyField(
+        'PriceForSpaServices',
+        verbose_name='Цена',
+        blank=True,
+        related_name='price_spa_services',
+    )
+    header_image = models.ImageField(
+        verbose_name='Файл основного изображения',
+        help_text='Изображение отображается в шапке карточки на странице Спа-программы',
+        blank=True,
+        upload_to='img/spa/'
+    )
+    id_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара/услуги',
+        help_text='ID товара/услуги в каталоге Битрикс24',
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Программа парения'
+        verbose_name_plural = 'Программы парения'
+
+
+class PriceForSpaServices(CreatedModel):
+    """Класс с ценами для программ парения."""
+    price = models.DecimalField(
+        verbose_name='Цена',
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+    )
+    max_guest = models.PositiveSmallIntegerField(
+        verbose_name='Максимальное количество человек',
+    )
+    duration = models.PositiveSmallIntegerField(
+        verbose_name='Продолжительность, мин.',
+        help_text='Продолжительность программы парения в минутах',
+    )
+
+    def __str__(self):
+        return f'{self.price} руб. до {self.max_guest} чел. за {self.duration} мин.'
+
+    class Meta:
+        verbose_name = 'Цена для программ парения'
+        verbose_name_plural = 'Цены для программ парения'
+
+
+class ReserveServices(CreatedModel):
+    """Класс дополнительных услуг для бронирования"""
+    reserve = models.ForeignKey(Reserve, on_delete=models.CASCADE, verbose_name='Бронирование')
+    additional_service = models.ForeignKey(AdditionalServices, on_delete=models.PROTECT,
+                                           verbose_name='Дополнительная услуга')
+    quantity = models.PositiveIntegerField(verbose_name='Количество')
+    cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Общая стоимость', blank=True)
+    id_b24 = models.PositiveSmallIntegerField(verbose_name='ID товарной позиции в Б24', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.cost = self.additional_service.price * self.quantity
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.reserve} - {self.additional_service} - {self.quantity}'
+
+    class Meta:
+        verbose_name = 'Дополнительная услуга для бронирования'
+        verbose_name_plural = 'Дополнительные услуги для бронирования'
+
+
+class WeekendDays(CreatedModel):
+    """Класс праздничные дни."""
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Наименование',
+        null=True,
+        blank=True
+    )
+    date = models.DateField(
+        verbose_name='Дата праздника',
+    )
+
+    def __str__(self):
+        return str(self.date)
+
+    class Meta:
+        verbose_name = 'Праздничный день'
+        verbose_name_plural = 'Праздничные дни'
+
+
+class SocialNetworks(CreatedModel):
+    """Класс социальные сети."""
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Наименование',
+    )
+    link = models.URLField(
+        verbose_name='Ссылка'
+    )
+    icon = models.ImageField(
+        verbose_name='Иконка',
+        upload_to='img/social/'
+    )
+    show_header = models.BooleanField(
+        verbose_name='Показывать в шапке',
+        default=False
+    )
+    show_footer = models.BooleanField(
+        verbose_name='Показывать в подвале',
+        default=False
+    )
+    show_block_booking = models.BooleanField(
+        verbose_name='Показывать в блоке бронирования',
+        default=False
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Социальная сеть'
+        verbose_name_plural = 'Социальные сети'
+
+
+class SettingsBitrix24(CreatedModel):
+    """Класс для настроек интеграции с Битрикс24."""
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Наименование',
+    )
+    webhook = models.URLField(
+        verbose_name='Webhook',
+        help_text='Webhook для интеграции с Битрикс24',
+        null=True,
+        blank=True
+    )
+    responsible_by_default = models.PositiveIntegerField(
+        verbose_name='Ответственный по умолчанию',
+        help_text='ID ответственного, который будет подставляться при создании сущностей CRM',
+        default=1,
+    )
+    stage_id_for_deal_adding = models.CharField(
+        verbose_name='ID стадии для создания сделки',
+        help_text='ID стадии воронки сделок для создания сделки бронирования с сайта в CRM',
+        max_length=10,
+        default=6,
+    )
+    reserve_field_code_b24 = models.CharField(
+        verbose_name='Код поля Бронирование',
+        help_text='Код поля Бронирование в Битрикс24 (тип поля Бронирование ресурсов)',
+        max_length=20,
+        default='UF_CRM_0000000000'
+    )
+    is_reserve_site_field_code_b24 = models.CharField(
+        verbose_name='Код поля Бронирование с сайта',
+        help_text='Код поля Бронирование с сайта в Битрикс24 (тип поля Да/Нет)',
+        max_length=20,
+        default='UF_CRM_0000000000'
+    )
+
+    def get_rest_key(self):
+        return urlparse(self.webhook).path.split('/')[-2]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            SettingsBitrix24.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Настройки для Битрикс24'
+        verbose_name_plural = 'Настройки для Битрикс24'
+
+
+class SettingsSite(CreatedModel):
+    """Класс для настроек сайта."""
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Наименование',
+    )
+    reserve_closed = models.BooleanField(
+        verbose_name='Бронирование закрыто',
+        help_text='Закрыть возможность бронирования на сайте для посетителей, есть возможность только у персонала',
+        default=False,
+    )
+    reserve_closed_all = models.BooleanField(
+        verbose_name='Бронирование закрыто для всех',
+        help_text='Закрыть возможность бронирования на сайте для всех, есть возможность только у суперпользователя',
+        default=False,
+    )
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            SettingsSite.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Настройки сайта'
+        verbose_name_plural = 'Настройки сайта'

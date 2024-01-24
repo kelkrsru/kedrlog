@@ -18,6 +18,10 @@
           <td>{{ user.email }}</td>
         </tr>
         <tr>
+          <th scope="row">Ваш телефон:</th>
+          <td>{{ user.phone }}</td>
+        </tr>
+        <tr>
           <th scope="row">Дата регистрации:</th>
           <td>{{ user.date_joined }}</td>
         </tr>
@@ -27,6 +31,10 @@
         </tr>
       </tbody>
     </table>
+  </div>
+  <div class="row ms-5 flex-row justify-content-end">
+    <a href="{% url 'accounts:change_user' %}" class="btn btn-primary col-6 col-lg-4 me-3">Изменить данные</a>
+    <a href="{% url 'accounts:password_change' %}" class="btn btn-success col-6 col-lg-4">Изменить пароль</a>
   </div>
 {% endblock %}
 

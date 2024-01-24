@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if text_content.seo_title %}{{ text_content.seo_title }}{% else %}{{ company.name }} - {{ text_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ text_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ text_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=price_content.header subtitle_span=price_content.second_header %}
+
+  <div class="content price-content mb-5">
+    <div class="row flex-row justify-content-center">
+      <div class="col-12 col-md-6">
+        <div class="card price-card">
+          <img src="{{ price_content.header_image.url }}" class="card-img-top" alt="price">
+          <div class="card-body">
+            <h5 class="card-title">{{ price_content.header_house }}</h5>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-4">Парная</th>
+                  <th scope="col" class="col-2">Этажи</th>
+                  <th scope="col" class="col-3">Пн-Чт</th>
+                  <th scope="col" class="col-3">Пт-Вс</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for house in price_content.house.all %}
+                  <tr>
+                    <td>{{ house.name }}</td>
+                    <td>{{ house.floor }}</td>
+                    {% for rate in house.rate_house.all %}
+                      {% if rate.active %}
+                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }}&#8381;{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }}₽{% else %}Не указано{% endif %}</td>
+                      {% endif %}
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if price_content.description_house %}<p class="card-text">{{ price_content.description_house }}</p>{% endif %}
+            <h5 class="card-title">{{ price_content.header_service }}</h5>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-7">Услуга</th>
+{#                  <th scope="col" class="col-3">Ед. изм</th>#}
+                  <th scope="col" class="col-5">Цена</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for service in price_content.service.all %}
+                  <tr>
+                    <td>{{ service.name }}</td>
+{#                    <td>{{ service.get_measure_display }}</td>#}
+                    <td class="text-color-green">{{ service.price|floatformat }}₽</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% if price_content.description_service %}<p class="card-text">{{ price_content.description_service }}</p>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

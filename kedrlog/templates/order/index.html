@@ -1,0 +1,581 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - Оформление заказа{% endblock %}
+{% block content %}
+  {% include 'includes/modals.html' %}
+  {% include 'includes/content_page_header.html' with subtitle_h2='Бронирование' subtitle_span='Оформление заказа' %}
+
+
+
+  <div class="container content-page-order">
+    <div class="row order-selected-house">
+      <div class="col-12 col-md-5 d-flex align-items-center">
+        <img src="{{ house.photo_main.image_small.url }}" class="order-selected-house-img"
+             alt="{{ house.photo_main.alt }}">
+      </div>
+      <div class="col-12 col-md-7 ps-5">
+        <p class="order-selected-house-header">{{ house.name }}</p>
+        <p class="order-selected-house-description">{{ house.description }}</p>
+        <p class="order-selected-house-header">В стоимость входит:</p>
+        <div class="row order-selected-house-icon">
+          {% for additional in house.additional_features.all %}
+            <div class="col-4 col-lg-2 text-center">
+              <img src="{{ additional.icon.url }}" alt="{{ additional.name }}">
+              <p>{{ additional.description }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div id="start-order" class="order-page-div"><span></span></div>
+    <div class="col-12 order-header-section">
+      <h4>Дата и время парения</h4>
+    </div>
+    <div class="row">
+      <div class="col-12 col-lg-4">
+        <div>
+          <label for="start-date" class="fw-bold mb-3">1. Выберите дату:</label>
+          <input id="start-date" type="date" class="form-control" min="{% now "Y-m-d" %}"
+                 value="{{ start_date|date:"Y-m-d" }}" onchange="ReloadTableStartDateTime(this)">
+        </div>
+        <div>
+          <label for="duration" class="fw-bold mb-3 mt-3">2. Продолжительность:</label>
+          <input id="duration" type="number" class="form-control" value="{{ duration }}" step="1" min="{{ rate.min_time }}" max="23"
+                 onchange="ReloadTableStartDateTime(this)">
+        </div>
+        <div class="mb-3">
+          <label for="count-guests" class="fw-bold mb-3 mt-3">3. Количество гостей:</label>
+          <input id="count-guests" type="number" class="form-control" value="{{ rate.guests_in_price }}" step="1" min="1" max="{{ house.max_guests }}" onchange="UpdateTotalSectionGuest(this)">
+        </div>
+      </div>
+      <div id="start-date-time-table" class="col-12 col-lg-8">
+        <div class="col-12">
+          <label class="fw-bold mb-3">4. Выберите время начала парения:</label>
+        </div>
+        {% load user_filters %}
+        {% for date_time in date_time_range %}
+          {% if forloop.counter in str_start_stop.start %}
+            <div class="row mb-3 flex-row justify-content-center">
+          {% endif %}
+        {#          <p>{{ date_time.value }}</p>#}
+        {% if date_time.value in start_date_time_busy %}
+          <button id="start-date-time-{{ forloop.counter0 }}"
+                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">Занято</span></button>
+        {% elif date_time.value <= now_date %}
+          <button id="start-date-time-{{ forloop.counter0 }}"
+                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">-</span></button>
+        {% elif date_time.value in start_date_time_allow %}
+          <button id="start-date-time-{{ forloop.counter0 }}"
+                  class="btn btn-outline-success col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"
+                  onclick="CheckStartDateTime({{ forloop.counter0 }})">{{ date_time.print }}<br><span
+            class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+        {% else %}
+          <button id="start-date-time-{{ forloop.counter0 }}"
+                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+        {% endif %}
+        {% if forloop.counter in str_start_stop.stop %}
+          </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="order-page-div"><span></span></div>
+    <div class="col-12 order-header-section">
+      <h4>Дополнительные услуги</h4>
+    </div>
+    <div>
+      <div class="row">
+        {% for service in additional_services %}
+          <div class="col-auto">
+            <label for="add-service-{{ service.id }}"
+                   class="col-form-label">{{ service.name }} (+{{ service.price|floatformat }} ₽)</label>
+            <input type="number" class="form-control" id="add-service-{{ service.id }}" step="1" value="0" min="0"
+                   {% if service.measure == 'service' %}max="1"{% endif %}
+                   onchange="UpdateTotalSectionAdditionalServices(this)">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="order-page-div"><span></span></div>
+    <div class="col-12 order-header-section">
+      <h4>Информация по заказу</h4>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <table class="table">
+          <tbody id="total-section-body">
+          <tr>
+            <td id="total-house-desc" class="col-8"></td>
+            <td id="total-house-quantity" class="col-2"></td>
+            <td id="total-house-price" class="col-2"></td>
+          </tr>
+          </tbody>
+          <tfoot>
+          <tr>
+            <td></td>
+            <td class="order-page-total-price-text">Итого:</td>
+            <td id="total-price" class="order-page-total-price-value">0.00 ₽</td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="order-page-div"><span></span></div>
+    <div class="col-12 order-header-section">
+      <h4>Контактные данные</h4>
+    </div>
+    <div class="row">
+      <div class="col-12 col-md-6 col-xl-3">
+        <label for="user-first-name" class="col-form-label">Имя</label>
+        <span class="required text-danger">*</span>
+        <input id="user-first-name" type="text" class="form-control" value="{{ user.first_name }}" required />
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <label for="user-last-name" class="col-form-label">Фамилия</label>
+        <span class="required text-danger">*</span>
+        <input id="user-last-name" type="text" class="form-control" value="{{ user.last_name }}" required />
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <label for="user-phone" class="col-form-label">Телефон</label>
+        <span class="required text-danger">*</span>
+        <input id="user-phone" type="tel" class="form-control" value="{{ user.phone }}" required data-phone-pattern />
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <label for="user-email" class="col-form-label">Электронная почта</label>
+        <input id="user-email" type="email" class="form-control" value="{{ user.email }}" />
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-12 text-end">
+        <button class="btn btn-lg btn-success" onclick="CreateOrder()">Забронировать</button>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+      function ReloadTableStartDateTime() {
+          let date = document.getElementById('start-date');
+          let duration = document.getElementById('duration');
+          window.location.href = "{% url 'order:index' %}?house={{ house.pk }}&date=" + date.value + "&duration=" + duration.value + "#start-order";
+      }
+
+      {#function UpdateStartDateTime(object) {#}
+      {#    $.ajax({#}
+      {#        url: "{% url 'order:update_start_date_time_table' %}",#}
+      {#        type: "POST",#}
+      {#        data: {#}
+      {#            "csrfmiddlewaretoken": "{{ csrf_token }}",#}
+      {#            "date": "{{ start_date|date:"Y-m-d" }}",#}
+      {#            "house": "{{ house.id }}",#}
+      {#            "duration": object.value,#}
+      {#        },#}
+      {#        success: function (response) {#}
+      {#            if (response.result) {#}
+      {#                let i;#}
+      {#                let start_date_time_str;#}
+      {#                let start_date_time_allow = response.start_date_time_allow;#}
+      {#                let start_date_time_busy = response.start_date_time_busy;#}
+      {#                let now_date_time = new Date();#}
+      {#                console.log(now_date_time);#}
+      {#                for (i = 0; i < 24; i++) {#}
+      {#                    let element = document.getElementById('start-date-time-' + i);#}
+      {#                    const start_date_time = new Date("{{ start_date|date:'Y-m-d' }} " + i + ":00") ;#}
+      {#                    console.log(start_date_time);#}
+      {#                    if (i < 10) {#}
+      {#                        start_date_time_str = "{{ start_date|date:'Y-m-d' }}T0" + i + ":00:00";#}
+      {#                    } else {#}
+      {#                        start_date_time_str = "{{ start_date|date:'Y-m-d' }}T" + i + ":00:00";#}
+      {#                    }#}
+      {#                    if (start_date_time_busy.includes(start_date_time_str)) {#}
+      {#                        element.disabled = true;#}
+      {#                        element.classList.remove('btn-outline-success');#}
+      {#                        element.classList.add('btn-outline-dark');#}
+      {#                        element.innerText = "Занято";#}
+      {#                    } else if (start_date_time <= now_date_time) {#}
+      {#                        element.disabled = true;#}
+      {#                        element.classList.remove('btn-outline-success');#}
+      {#                        element.classList.add('btn-outline-dark');#}
+      {#                        element.textContent = "-";#}
+      {#                    } else if (start_date_time_allow.includes(start_date_time_str)) {#}
+      {#                        element.disabled = false;#}
+      {#                        element.classList.add('btn-outline-success');#}
+      {#                        element.classList.remove('btn-outline-dark');#}
+      {#                        element.textContent = "Свободно";#}
+      {#                    } else {#}
+      {#                        element.disabled = true;#}
+      {#                        element.classList.add('btn-outline-success');#}
+      {#                        element.classList.remove('btn-outline-dark');#}
+      {#                        element.textContent = "Свободно";#}
+      {#                    }#}
+      {#                }#}
+      {#            }#}
+      {#            else {#}
+      {#                const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));#}
+      {#                document.getElementById('modal-error-title').innerHTML = 'Ошибка';#}
+      {#                document.getElementById('modal-error-text').innerHTML = response.error;#}
+      {#                modal_error.show();#}
+      {#            }#}
+      {#        },#}
+      {#        error: function () {#}
+      {#            const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));#}
+      {#            document.getElementById('modal-error-title').innerHTML = 'Ошибка';#}
+      {#            document.getElementById('modal-error-text').innerHTML = 'Ошибка при выборе даты и времени бронирования';#}
+      {#            modal_error.show();#}
+      {#        }#}
+      {#    });#}
+      //}
+
+      function CheckStartDateTime(id) {
+          {#Функция для выбора времени в таблице#}
+          let elements = document.querySelectorAll('.start-date-time');
+          let temp_row = document.querySelector('#temp-row');
+          let i;
+          for (i = 0; i < elements.length; ++i) {
+              elements[i].classList.remove('selected-date-time');
+              elements[i].style.backgroundColor = 'white';
+              elements[i].style.color = '#5c703e';
+          }
+          if (temp_row) {
+             temp_row.remove();
+          }
+          let duration = document.querySelector('#duration').value;
+          i = 0;
+          while (i < duration) {
+              let button_id = "start-date-time-" + (id + i);
+              let element = document.querySelector('#' + button_id);
+              if (i === 0) {
+                  element.classList.add('selected-date-time');
+              }
+              if (element) {
+                  element.style.backgroundColor = '#5c703e';
+                  element.style.color = 'white';
+              }
+              i += 1;
+          }
+          if (id + Number(duration) > 24) {
+              const count = id + Number(duration) - 24;
+              let div_table = document.querySelector('#start-date-time-table');
+              let div_row = document.createElement('div');
+              div_row.classList.add('row', 'mb-3', 'flex-row', 'justify-content-center');
+              div_row.id = 'temp-row';
+              div_table.appendChild(div_row);
+
+              for (i = 0; i < count; ++i) {
+                  let button = document.createElement('button');
+                  button.classList.add('btn', 'btn-outline-success', 'col-4', 'col-md-1', 'me-3', 'start-date-time');
+                  button.innerHTML = '0' + i + ':00<br><span class="fw-bold">{{ price_house_tomorrow|floatformat }} ₽</span>';
+                  button.style.backgroundColor = '#5c703e';
+                  button.style.color = 'white';
+                  div_row.appendChild(button);
+              }
+          }
+          UpdateTotalSectionHouse(id);
+      }
+
+      function UpdateTotalSectionHouse(id) {
+          {#Функция обновления итоговой таблицы при выборе парной#}
+          $.ajax({
+              url: "{% url 'order:update_total_section_house' %}",
+              type: "POST",
+              data: {
+                  "csrfmiddlewaretoken": "{{ csrf_token }}",
+                  "start_date": "{{ start_date|date:"Y-m-d" }}",
+                  "start_time": id + ":00",
+                  "duration": "{{ duration }}",
+                  "house_id": "{{ house.pk }}",
+              },
+              success: function (response) {
+                  if (response.result) {
+                      document.querySelector('#total-house-desc').textContent = response.house_string;
+                      document.querySelector('#total-house-quantity').textContent = '1 усл.';
+                      document.querySelector('#total-house-price').textContent = response.house_price;
+                      UpdateTotal();
+                  }
+                  else {
+                      const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                      document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                      document.querySelector('#modal-error-text').textContent = response.error;
+                      modal_error.show();
+                  }
+              },
+              error: function () {
+                  const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                  document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                  document.querySelector('#modal-error-text').textContent = 'Ошибка при выборе даты и времени бронирования';
+                  modal_error.show();
+              }
+          });
+      }
+
+      function UpdateTotalSectionAdditionalServices(object) {
+          {#Функция обновления итоговой таблицы при выборе дополнительных услуг#}
+          let tbody = document.querySelector('#total-section-body');
+          let old_row = document.querySelector('#total-' + object.id);
+          if (old_row) {
+              if (object.value === '0') {
+                  old_row.remove();
+                  UpdateTotal();
+                  return;
+              }
+              $.ajax({
+                  url: "{% url 'order:update_total_section_service' %}",
+                  type: "POST",
+                  data: {
+                      "csrfmiddlewaretoken": "{{ csrf_token }}",
+                      "service_id": object.id.split('-')[2],
+                      "quantity": object.value,
+                  },
+                  success: function (response) {
+                      if (response.result) {
+                          old_row.cells[0].textContent = response.service_name;
+                          old_row.cells[1].textContent = object.value + ' шт.';
+                          old_row.cells[2].textContent = response.service_price;
+                          UpdateTotal();
+                      }
+                      else {
+                          const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                          document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                          document.querySelector('#modal-error-text').textContent = response.error;
+                          modal_error.show();
+                      }
+                  },
+                  error: function () {
+                      const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                      document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                      document.querySelector('#modal-error-text').textContent = 'Ошибка при добавлении услуги/товара';
+                      modal_error.show();
+                  }
+              });
+          } else {
+              $.ajax({
+                  url: "{% url 'order:update_total_section_service' %}",
+                  type: "POST",
+                  data: {
+                      "csrfmiddlewaretoken": "{{ csrf_token }}",
+                      "service_id": object.id.split('-')[2],
+                      "quantity": object.value,
+                  },
+                  success: function (response) {
+                      if (response.result) {
+                          let new_row = tbody.insertRow(-1);
+                          new_row.id = 'total-' + object.id;
+                          new_row.classList.add('total-add-service');
+                          new_row.insertCell(0).appendChild(document.createTextNode(response.service_name));
+                          new_row.insertCell(1).appendChild(document.createTextNode(object.value + ' шт.'));
+                          new_row.insertCell(2).appendChild(document.createTextNode(response.service_price));
+                          UpdateTotal();
+                      }
+                      else {
+                          const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                          document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                          document.querySelector('#modal-error-text').textContent = response.error;
+                          modal_error.show();
+                      }
+
+                  },
+                  error: function () {
+                      const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                      document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                      document.querySelector('#modal-error-text').textContent = 'Ошибка при добавлении услуги/товара';
+                      modal_error.show();
+                  }
+              });
+          }
+      }
+
+      function UpdateTotalSectionGuest(object) {
+          {#Функция обновления итоговой таблицы при дополнительных гостях#}
+          let tbody = document.querySelector('#total-section-body');
+          let old_row = document.querySelector('#total-guest-price');
+          const object_value = parseInt(object.value);
+          const count_additional_guest = object_value - {{ rate.guests_in_price }}
+          if (old_row) {
+              if (object_value <= {{ rate.guests_in_price }}) {
+                  old_row.remove();
+                  UpdateTotal();
+                  return;
+              }
+              old_row.cells[1].textContent = count_additional_guest + ' чел.';
+              old_row.cells[2].textContent = (parseFloat({{ rate.additional_guest_price }}) * count_additional_guest).toFixed(2) + ' ₽';
+              UpdateTotal();
+          }
+          else if (object_value > {{ rate.guests_in_price }}) {
+              let new_row = tbody.insertRow(-1);
+              new_row.id = 'total-guest-price';
+              new_row.insertCell(0).appendChild(document.createTextNode('Доплата за дополнительного гостя'));
+              new_row.insertCell(1).appendChild(document.createTextNode(count_additional_guest + ' чел.'));
+              new_row.insertCell(2).appendChild(document.createTextNode('{{ rate.additional_guest_price }} ₽'.replace(',','.')));
+              UpdateTotal();
+          }
+      }
+
+      function UpdateTotal() {
+          {#Функция обновления поля Итого в таблице деталей по заказу#}
+          let total = 0;
+          let tbody = document.querySelector('#total-section-body');
+          let total_elements = tbody.querySelectorAll('tr');
+          for (let elem of total_elements) {
+              if (elem.cells[2].textContent) {
+                  total += parseFloat(elem.cells[2].textContent.split(' ')[0]);
+              }
+          }
+
+          document.querySelector('#total-price').textContent = total.toFixed(2) + ' ₽';
+      }
+
+      function ValidateOrder(first_name, last_name, phone, email, start_date) {
+          {#Функция для валидации полей заказа#}
+          function ValidateUser(no_validate, first_name, last_name) {
+              first_name.classList.remove('is-invalid');
+              last_name.classList.remove('is-invalid');
+              if (!first_name.value.match(/^[\w\sа-яА-ЯЁё]+$/)) {
+                  no_validate.push(first_name);
+              }
+              if (!last_name.value.match(/^[\w\sа-яА-ЯЁё]+$/)) {
+                  no_validate.push(last_name);
+              }
+              return no_validate;
+          }
+
+          function ValidatePhone(no_validate, phone) {
+              phone.classList.remove('is-invalid');
+              let phone_value = phone.value.match(/\d+/g);
+              if (!phone_value || phone_value.join('').length < 11) {
+                  no_validate.push(phone);
+              }
+              return no_validate;
+          }
+
+          function ValidateEmail(no_validate, email) {
+              email.classList.remove('is-invalid');
+              if (!email.value) {
+                  return no_validate;
+              }
+              if (!email.value.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+                  no_validate.push(email);
+              }
+              return no_validate;
+          }
+
+          function ValidateStartDateTime(no_validate, start_date) {
+              let start_date_time_table = document.querySelector('#start-date-time-table');
+              start_date.classList.remove('is-invalid');
+              start_date_time_table.classList.remove('border','border-danger');
+              let cell_house = document.querySelector('#total-house-price');
+              const now = new Date();
+              const start_date_time = new Date("{{ start_date|date:'Y-m-d' }}");
+              if (start_date_time.setHours(0,0,0,0) < now.setHours(0,0,0,0)) {
+                  no_validate.push(start_date);
+              }
+              if (!cell_house.textContent) {
+                  start_date_time_table.classList.add('border', 'border-danger');
+              }
+              return no_validate;
+          }
+
+          let result = [];
+          result = ValidateUser(result, first_name, last_name);
+          result = ValidatePhone(result, phone);
+          result = ValidateEmail(result, email);
+          result = ValidateStartDateTime(result, start_date);
+
+          if (result.length > 0) {
+              for (let res in result) {
+                  result[res].classList.add('is-invalid');
+              }
+              const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+              document.querySelector('#modal-error-title').textContent = 'Ошибка';
+              document.querySelector('#modal-error-text').textContent = 'Проверьте параметры бронирования и введите корректные значения';
+              modal_error.show();
+              return false;
+          }
+          return true;
+      }
+
+      function CreateOrder() {
+          document.querySelector('#div-loader').style.display = "block";
+          let selected_date_time = document.querySelectorAll('.selected-date-time');
+          let start_date = document.querySelector('#start-date');
+          {#let start_date = new Date("{{ start_date|date:'Y-m-d' }}");#}
+          let duration = {{ duration }};
+          let count_guests = document.querySelector('#count-guests');
+          let user_first_name = document.querySelector('#user-first-name');
+          let user_last_name = document.querySelector('#user-last-name');
+          let user_email = document.querySelector('#user-email');
+          let user_phone = document.querySelector('#user-phone');
+          let house_pk = {{ house.pk }};
+          let total_price = document.querySelector('#total-price');
+          let additional_services = document.querySelectorAll('.total-add-service');
+          let additional_services_mass = [];
+
+          if (!ValidateOrder(user_first_name, user_last_name, user_phone, user_email, start_date)) {
+              return false;
+          }
+          let start_date_time = "{{ start_date|date:'Y-m-d' }} " + selected_date_time[0].id.split('-')[3] + ":00";
+
+          for (let service of additional_services) {
+              let children = service.querySelectorAll('td');
+              let elem = {};
+              elem[service.id.split('-')[3]] = children[1].textContent.split(' ')[0];
+              additional_services_mass.push(elem);
+          }
+
+          $.ajax({
+              url: "{% url 'order:new' %}",
+              type: "POST",
+              data: {
+                  "csrfmiddlewaretoken": "{{ csrf_token }}",
+                  "start_date_time": start_date_time,
+                  "duration": duration,
+                  "count_guests": count_guests.value,
+                  "username": "{{ user.username }}",
+                  "user_first_name": user_first_name.value,
+                  "user_last_name": user_last_name.value,
+                  "user_email": user_email.value,
+                  "user_phone": user_phone.value,
+                  "house_pk": house_pk,
+                  "total_price": total_price.textContent.split(' ')[0],
+                  "additional_services": JSON.stringify(additional_services_mass),
+              },
+              success: function (response) {
+                  if (response.result) {
+                      document.querySelector('#div-loader').style.display = "none";
+                      const modal_error = new bootstrap.Modal(document.querySelector('#modal-success'));
+                      document.querySelector('#modal-success-title').textContent = 'Успех';
+                      document.querySelector('#modal-success-text').textContent = 'Бронирование успешно создано. Подробная информация отправлена вам на номер телефона';
+                      modal_error.show();
+                  }
+                  else {
+                      document.querySelector('#div-loader').style.display = "none";
+                      const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                      document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                      document.querySelector('#modal-error-text').textContent = response.error;
+                      modal_error.show();
+                  }
+              },
+              error: function () {
+                  document.querySelector('#div-loader').style.display = "none";
+                  const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));
+                  document.querySelector('#modal-error-title').textContent = 'Ошибка';
+                  document.querySelector('#modal-error-text').textContent = 'Ошибка при добавлении услуги/товара';
+                  modal_error.show();
+              }
+          });
+      }
+
+      $("#modal-success").on("hidden.bs.modal", function () {
+          window.location.replace("{% url 'mainpage:index' %}");
+      });
+
+      {#Запрещает ручной ввод в input type=number#}
+      $("[type='number']").keypress(function (evt) {
+          evt.preventDefault();
+      });
+  </script>
+{% endblock %}
+

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 
 from core.models import Company
 from staticpages.models import GalleryHouses, GalleryTerritory, GalleryFood, TextContentRules, TextContentAccessories, \
-    TextContentRent
+    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa
 
 
 def page_gallery(request):
@@ -42,12 +42,44 @@ def page_text_content(request):
         text_content = get_object_or_404(TextContentAccessories, active=True)
     elif page == 'rent':
         text_content = get_object_or_404(TextContentRent, active=True)
+    elif page == 'corporate':
+        text_content = get_object_or_404(TextContentCorporate, active=True)
     else:
         text_content = None
 
     context = {
         'company': company,
         'text_content': text_content
+    }
+    response = render(request, template, context)
+    return response
+
+
+def page_price(request):
+    """Метод страницы с ценами."""
+    template = 'staticpages/price.html'
+
+    price_content = get_object_or_404(ContentPrice, active=True)
+    company = Company.objects.get(active=True)
+
+    context = {
+        'company': company,
+        'price_content': price_content
+    }
+    response = render(request, template, context)
+    return response
+
+
+def page_spa(request):
+    """Метод страницы с ценами."""
+    template = 'staticpages/spa.html'
+
+    spa_content = get_object_or_404(ContentSpa, active=True)
+    company = Company.objects.get(active=True)
+
+    context = {
+        'company': company,
+        'spa_content': spa_content
     }
     response = render(request, template, context)
     return response

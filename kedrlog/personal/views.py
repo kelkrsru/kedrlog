@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.utils import timezone
 
 from core.models import Company, Reserve
 
@@ -27,8 +28,8 @@ def reserve(request):
 
     company = Company.objects.get(active=True)
 
-    dt_now = datetime.now()
-    reserves = Reserve.objects.filter(end_date__gte=dt_now.date(), end_time__gte=dt_now.time(), user=request.user)
+    dt_now = timezone.now().replace(tzinfo=timezone.get_current_timezone())
+    reserves = Reserve.objects.filter(end_date_time__gte=dt_now, user=request.user)
 
     context = {
         'company': company,

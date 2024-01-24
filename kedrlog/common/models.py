@@ -65,11 +65,11 @@ class GalleryItem(CreatedModel):
     )
     image_large = models.ImageField(
         verbose_name='Картинка в исходном разрешении',
-        upload_to='media/gallery/'
+        upload_to='gallery/'
     )
     image_small = models.ImageField(
         verbose_name='Картинка для превью',
-        upload_to='media/gallery/'
+        upload_to='gallery/'
     )
 
     def __str__(self):

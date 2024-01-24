@@ -17,6 +17,13 @@
           <div class="footer__contacts-title footer__contacts-title-phone">Контактный телефон</div>
           {% load user_filters %}
           <div class="footer__contacts-phone"><a href="tel:{{ company.phone|clear_phone }}">{{ company.phone }}</a></div>
+          <div class="footer__social-networks">
+            {% for network in company.social_networks.all %}
+              {% if network.show_footer %}
+                <a href="{{ network.link }}" target="_blank"><img src="{{ network.icon.url }}" alt="{{ network.name }}"/></a>
+              {% endif %}
+            {% endfor %}
+          </div>
           <div class="footer__contacts-title footer__contacts-title-address">Адрес</div>
           <div class="footer__contacts-address">{{ company.address }}</div>
         </div>

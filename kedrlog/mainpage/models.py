@@ -39,7 +39,7 @@ class ContentBlockMain(ContentBlock):
         verbose_name='Видео файл mp4',
         help_text='Выберите видео файл в формате mp4',
         validators=[FileExtensionValidator(['mp4'])],
-        upload_to='media/video/contentblockmain/'
+        upload_to='video/contentblockmain/'
     )
 
     def save(self, *args, **kwargs):
@@ -60,7 +60,7 @@ class ContentBlockRoundedMenuItem(models.Model):
     )
     image = models.ImageField(
         verbose_name='Иконка элемента',
-        upload_to='media/img/roundedmenu',
+        upload_to='img/roundedmenu',
     )
     image_alt = models.CharField(
         verbose_name='Alt описание',
@@ -180,13 +180,14 @@ class HouseShowBooking(CreatedModel):
 
     class Meta:
         verbose_name = 'Расположение Парных на блоке Бронирования'
+        ordering = ['-house__active', 'house__name']
 
 
 class ContentBlockBooking(ContentBlock, ContentBlockHeader):
     """Класс блока для Бронирования."""
     background_image = models.ImageField(
         verbose_name='Фоновое изображение',
-        upload_to='media/img/booking'
+        upload_to='img/booking'
     )
     houses = models.ManyToManyField(
         House,

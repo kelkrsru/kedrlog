@@ -45,8 +45,8 @@
               </div>
               {% load static %}
               <div class="card-body {% if reserve.paid %}paid{% endif %}">
-                <p><span class="fw-bold">Начало</span><br>{{ reserve.start_date }} {{ reserve.start_time }}</p>
-                <p><span class="fw-bold">Окончание</span><br>{{ reserve.end_date }} {{ reserve.end_time }}</p>
+                <p><span class="fw-bold">Начало</span><br>{{ reserve.start_date_time }}</p>
+                <p><span class="fw-bold">Окончание</span><br>{{ reserve.end_date_time }}</p>
                 <p><span class="fw-bold">Количество гостей</span><br>{{ reserve.count_guests }}</p>
               </div>
               <div class="card-footer fw-bold">

@@ -1,4 +1,6 @@
-from common.models import Gallery, TextContent
+from common.models import Gallery, TextContent, Content
+from core.models import House, AdditionalServices, SpaServices
+from django.db import models
 
 
 class GalleryHouses(Gallery):
@@ -71,3 +73,86 @@ class TextContentRent(TextContent):
     class Meta:
         verbose_name = 'Контент для страницы Аренда комплекса'
         verbose_name_plural = 'Контент для страницы Аренда комплекса'
+
+
+class TextContentCorporate(TextContent):
+    """Класс текстового контента для страницы Корпоративным клиентам."""
+    def save(self, *args, **kwargs):
+        if self.active:
+            TextContentCorporate.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Корпоративным клиентам'
+        verbose_name_plural = 'Контент для страницы Корпоративным клиентам'
+
+
+class ContentPrice(Content):
+    """Класс контента для страницы Цены."""
+    house = models.ManyToManyField(
+        House,
+        verbose_name='Парные',
+        help_text='Выберите парные для отображения на странице Цены в основных услугах',
+        related_name='house_content_price'
+    )
+    service = models.ManyToManyField(
+        AdditionalServices,
+        verbose_name='Дополнительные услуги',
+        help_text='Выберите дополнительные услуги',
+        related_name='service_content_price',
+        blank=True,
+    )
+    header_image = models.ImageField(
+        verbose_name='Файл основного изображения',
+        blank=True,
+        upload_to='img/price/'
+    )
+    header_house = models.CharField(
+        verbose_name='Заголовок для основных услуг',
+        max_length=1024,
+    )
+    description_house = models.CharField(
+        verbose_name='Описание для основных услуг',
+        max_length=1024,
+        blank=True,
+        null=True
+    )
+    header_service = models.CharField(
+        verbose_name='Заголовок для дополнительных услуг',
+        max_length=1024,
+    )
+    description_service = models.CharField(
+        verbose_name='Описание для дополнительных услуг',
+        max_length=1024,
+        blank=True,
+        null=True
+    )
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            ContentPrice.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Цены'
+        verbose_name_plural = 'Контент для страницы Цены'
+
+
+class ContentSpa(Content):
+    """Класс контента для страницы Спа-программы."""
+    spa_service = models.ManyToManyField(
+        SpaServices,
+        verbose_name='Программы парения',
+        help_text='Выберите отображаемые программы парения',
+        related_name='spa_service_content_spa',
+        blank=True,
+    )
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            ContentSpa.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Спа-программы'
+        verbose_name_plural = 'Контент для страницы Спа-программы'
