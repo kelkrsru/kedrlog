@@ -61,11 +61,11 @@
         {% if date_time.value in start_date_time_busy %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">Занято</span></button>
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
         {% elif date_time.value <= now_date %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">-</span></button>
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
         {% elif date_time.value in start_date_time_allow %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-success col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"

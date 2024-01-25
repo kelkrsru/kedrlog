@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
 from common.models import CreatedModel, GalleryItem
@@ -323,6 +323,27 @@ class Reserve(CreatedModel):
         end_date_interval = timezone.datetime.combine(reserve_date + timezone.timedelta(days=1),
                                                       timezone.datetime.max.time(), tz)
         reserve_date_interval = [start_date_interval, end_date_interval]
+        # Добавим все часы в занятые, которые вне расписания бронирования
+        settings_site = SettingsSite.objects.get(active=True)
+        reserve_start_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
+                                               hour=settings_site.reserve_start_time, minute=0, second=0)
+        if settings_site.reserve_end_time != 24:
+            reserve_end_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
+                                                 hour=settings_site.reserve_end_time, minute=0, second=0)
+        else:
+            reserve_end_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
+                                                 hour=23, minute=59, second=59)
+        print(f'{reserve_start_time=}')
+        print(f'{reserve_end_time=}')
+        while reserve_start_time > timezone.datetime.combine(
+                reserve_date - timezone.timedelta(days=1), timezone.datetime.max.time()):
+            start_date_time_busy.add(reserve_start_time - timezone.timedelta(hours=1))
+            reserve_start_time -= timezone.timedelta(hours=1)
+        while reserve_end_time < timezone.datetime.combine(
+                reserve_date + timezone.timedelta(days=1), timezone.datetime.min.time()):
+            start_date_time_busy.add(reserve_end_time + timezone.timedelta(hours=1))
+            reserve_end_time += timezone.timedelta(hours=1)
+        print(f'{start_date_time_busy=}')
 
         reserves = cls.objects.filter(house=reserve_house, start_date_time__range=reserve_date_interval)
         for reserve in reserves:
@@ -359,7 +380,8 @@ class Reserve(CreatedModel):
         start_date_time_allow = sorted(start_date_time_allow)
         i = 0
         while i < len(start_date_time_allow):
-            reserve_interval = [start_date_time_allow[i] + timezone.timedelta(hours=x) for x in range(duration + house_cleaning)]
+            reserve_interval = [start_date_time_allow[i] + timezone.timedelta(hours=x) for x in
+                                range(duration + house_cleaning)]
             j = False
             for date_time in reserve_interval:
                 if date_time in start_date_time_busy:
@@ -683,6 +705,20 @@ class SettingsSite(CreatedModel):
     name = models.CharField(
         max_length=100,
         verbose_name='Наименование',
+    )
+    reserve_start_time = models.PositiveSmallIntegerField(
+        verbose_name='Старт бронирования',
+        help_text='Укажите час, с которого начинается бронирование',
+        default=0,
+        validators=[MinValueValidator(0, 'Часы не могут быть меньше 0'),
+                    MaxValueValidator(24, 'Часы не могут быть больше 24')],
+    )
+    reserve_end_time = models.PositiveSmallIntegerField(
+        verbose_name='Окончание бронирования',
+        help_text='Укажите час, после которого кончается бронирование',
+        default=24,
+        validators=[MinValueValidator(0, 'Часы не могут быть меньше 0'),
+                    MaxValueValidator(24, 'Часы не могут быть больше 24')],
     )
     reserve_closed = models.BooleanField(
         verbose_name='Бронирование закрыто',

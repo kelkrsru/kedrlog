@@ -108,3 +108,17 @@ class SettingsBitrix24Admin(admin.ModelAdmin):
 class SettingsSiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active']
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": ["active", "name"],
+            },
+        ),
+        (
+            'Настройки модуля бронирования',
+            {
+                "fields": ['reserve_start_time', 'reserve_end_time', 'reserve_closed', 'reserve_closed_all'],
+            },
+        ),
+    ]
