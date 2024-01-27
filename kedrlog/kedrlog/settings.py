@@ -157,6 +157,7 @@ ADMIN_REORDER = (
         'staticpages.GalleryTerritory',
         'staticpages.GalleryFood',
         'staticpages.TextContentRules',
+        'staticpages.TextContentFz152',
         'staticpages.TextContentAccessories',
         'staticpages.TextContentRent',
         'staticpages.TextContentCorporate',

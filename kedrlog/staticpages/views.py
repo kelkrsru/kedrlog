@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 
 from core.models import Company
 from staticpages.models import GalleryHouses, GalleryTerritory, GalleryFood, TextContentRules, TextContentAccessories, \
-    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa
+    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa, TextContentFz152
 
 
 def page_gallery(request):
@@ -38,6 +38,8 @@ def page_text_content(request):
     company = Company.objects.get(active=True)
     if page == 'rules':
         text_content = get_object_or_404(TextContentRules, active=True)
+    elif page == 'fz152':
+        text_content = get_object_or_404(TextContentFz152, active=True)
     elif page == 'accessories':
         text_content = get_object_or_404(TextContentAccessories, active=True)
     elif page == 'rent':
