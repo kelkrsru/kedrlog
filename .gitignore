@@ -164,4 +164,4 @@ cython_debug/
 static/
 media/
 /kedrlog/sent_emails/
-migrations/
+/kedrlog/*/migrations/
