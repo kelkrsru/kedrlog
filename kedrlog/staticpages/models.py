@@ -51,6 +51,18 @@ class TextContentRules(TextContent):
         verbose_name_plural = 'Контент для страницы Правила посещения'
 
 
+class TextContentFz152(TextContent):
+    """Класс текстового контента для страницы ФЗ152."""
+    def save(self, *args, **kwargs):
+        if self.active:
+            TextContentFz152.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Обработка ПД ФЗ-152'
+        verbose_name_plural = 'Контент для страницы Обработка ПД ФЗ-152'
+
+
 class TextContentAccessories(TextContent):
     """Класс текстового контента для страницы Аксессуары."""
     def save(self, *args, **kwargs):

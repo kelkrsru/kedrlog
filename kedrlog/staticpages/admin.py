@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from staticpages.models import GalleryHouses, GalleryTerritory, GalleryFood, TextContentRules, TextContentAccessories, \
-    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa
+    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa, TextContentFz152
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
 
@@ -93,6 +93,13 @@ class GalleryFoodAdmin(admin.ModelAdmin):
 
 @admin.register(TextContentRules)
 class TextContentRulesAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active', ]
+    fieldsets = FIELDSETS_FOR_TEXT_CONTENT
+
+
+@admin.register(TextContentFz152)
+class TextContentFz152Admin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT

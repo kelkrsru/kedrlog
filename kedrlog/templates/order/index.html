@@ -61,11 +61,11 @@
         {% if date_time.value in start_date_time_busy %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">Занято</span></button>
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
         {% elif date_time.value <= now_date %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">-</span></button>
+                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
         {% elif date_time.value in start_date_time_allow %}
           <button id="start-date-time-{{ forloop.counter0 }}"
                   class="btn btn-outline-success col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"
@@ -148,9 +148,23 @@
         <input id="user-email" type="email" class="form-control" value="{{ user.email }}" />
       </div>
     </div>
-    <div class="row mt-5">
+    <div class="row flex-row justify-content-end mt-3 ms-1">
+      <div class="col-12 col-md-auto form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="check-box-fz152" required onchange="CheckRules()">
+        <label class="form-check-label" for="check-box-fz152">Даю согласие на обработку своих персональных данных <a href="{% url 'fz152' %}" target="_blank">согласно 152 ФЗ</a></label>
+        <span class="required text-danger">*</span>
+      </div>
+    </div>
+    <div class="row flex-row justify-content-end mt-3 ms-1">
+      <div class="col-12 col-md-auto form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="check-box-rules" required onchange="CheckRules()">
+        <label class="form-check-label" for="check-box-rules">Соглашаюсь с <a href="{% url 'rules' %}" target="_blank">правилами аренды</a></label>
+        <span class="required text-danger">*</span>
+      </div>
+    </div>
+    <div class="row mt-3">
       <div class="col-12 text-end">
-        <button class="btn btn-lg btn-success" onclick="CreateOrder()">Забронировать</button>
+        <button class="btn btn-lg btn-success" id="reserve" onclick="CreateOrder({{ duration }}, {{ house_pk }})" disabled>Забронировать</button>
       </div>
     </div>
   </div>
@@ -164,71 +178,14 @@
           window.location.href = "{% url 'order:index' %}?house={{ house.pk }}&date=" + date.value + "&duration=" + duration.value + "#start-order";
       }
 
-      {#function UpdateStartDateTime(object) {#}
-      {#    $.ajax({#}
-      {#        url: "{% url 'order:update_start_date_time_table' %}",#}
-      {#        type: "POST",#}
-      {#        data: {#}
-      {#            "csrfmiddlewaretoken": "{{ csrf_token }}",#}
-      {#            "date": "{{ start_date|date:"Y-m-d" }}",#}
-      {#            "house": "{{ house.id }}",#}
-      {#            "duration": object.value,#}
-      {#        },#}
-      {#        success: function (response) {#}
-      {#            if (response.result) {#}
-      {#                let i;#}
-      {#                let start_date_time_str;#}
-      {#                let start_date_time_allow = response.start_date_time_allow;#}
-      {#                let start_date_time_busy = response.start_date_time_busy;#}
-      {#                let now_date_time = new Date();#}
-      {#                console.log(now_date_time);#}
-      {#                for (i = 0; i < 24; i++) {#}
-      {#                    let element = document.getElementById('start-date-time-' + i);#}
-      {#                    const start_date_time = new Date("{{ start_date|date:'Y-m-d' }} " + i + ":00") ;#}
-      {#                    console.log(start_date_time);#}
-      {#                    if (i < 10) {#}
-      {#                        start_date_time_str = "{{ start_date|date:'Y-m-d' }}T0" + i + ":00:00";#}
-      {#                    } else {#}
-      {#                        start_date_time_str = "{{ start_date|date:'Y-m-d' }}T" + i + ":00:00";#}
-      {#                    }#}
-      {#                    if (start_date_time_busy.includes(start_date_time_str)) {#}
-      {#                        element.disabled = true;#}
-      {#                        element.classList.remove('btn-outline-success');#}
-      {#                        element.classList.add('btn-outline-dark');#}
-      {#                        element.innerText = "Занято";#}
-      {#                    } else if (start_date_time <= now_date_time) {#}
-      {#                        element.disabled = true;#}
-      {#                        element.classList.remove('btn-outline-success');#}
-      {#                        element.classList.add('btn-outline-dark');#}
-      {#                        element.textContent = "-";#}
-      {#                    } else if (start_date_time_allow.includes(start_date_time_str)) {#}
-      {#                        element.disabled = false;#}
-      {#                        element.classList.add('btn-outline-success');#}
-      {#                        element.classList.remove('btn-outline-dark');#}
-      {#                        element.textContent = "Свободно";#}
-      {#                    } else {#}
-      {#                        element.disabled = true;#}
-      {#                        element.classList.add('btn-outline-success');#}
-      {#                        element.classList.remove('btn-outline-dark');#}
-      {#                        element.textContent = "Свободно";#}
-      {#                    }#}
-      {#                }#}
-      {#            }#}
-      {#            else {#}
-      {#                const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));#}
-      {#                document.getElementById('modal-error-title').innerHTML = 'Ошибка';#}
-      {#                document.getElementById('modal-error-text').innerHTML = response.error;#}
-      {#                modal_error.show();#}
-      {#            }#}
-      {#        },#}
-      {#        error: function () {#}
-      {#            const modal_error = new bootstrap.Modal(document.querySelector('#modal-error'));#}
-      {#            document.getElementById('modal-error-title').innerHTML = 'Ошибка';#}
-      {#            document.getElementById('modal-error-text').innerHTML = 'Ошибка при выборе даты и времени бронирования';#}
-      {#            modal_error.show();#}
-      {#        }#}
-      {#    });#}
-      //}
+      function CheckRules() {
+          {#Функция для проверки согласий с правилами и активации кнопки Забронировать#}
+          let check_box_fz152 = document.querySelector('#check-box-fz152');
+          let check_box_rules = document.querySelector('#check-box-rules');
+          let btn_reserve = document.querySelector('#reserve');
+
+          btn_reserve.disabled = !(check_box_fz152.checked && check_box_rules.checked);
+      }
 
       function CheckStartDateTime(id) {
           {#Функция для выбора времени в таблице#}
@@ -474,6 +431,7 @@
               }
               if (!cell_house.textContent) {
                   start_date_time_table.classList.add('border', 'border-danger');
+                  no_validate.push(start_date_time_table);
               }
               return no_validate;
           }
@@ -497,18 +455,15 @@
           return true;
       }
 
-      function CreateOrder() {
-          document.querySelector('#div-loader').style.display = "block";
+      function CreateOrder(duration, house_pk) {
           let selected_date_time = document.querySelectorAll('.selected-date-time');
           let start_date = document.querySelector('#start-date');
           {#let start_date = new Date("{{ start_date|date:'Y-m-d' }}");#}
-          let duration = {{ duration }};
           let count_guests = document.querySelector('#count-guests');
           let user_first_name = document.querySelector('#user-first-name');
           let user_last_name = document.querySelector('#user-last-name');
           let user_email = document.querySelector('#user-email');
           let user_phone = document.querySelector('#user-phone');
-          let house_pk = {{ house.pk }};
           let total_price = document.querySelector('#total-price');
           let additional_services = document.querySelectorAll('.total-add-service');
           let additional_services_mass = [];
@@ -516,6 +471,8 @@
           if (!ValidateOrder(user_first_name, user_last_name, user_phone, user_email, start_date)) {
               return false;
           }
+
+          document.querySelector('#div-loader').style.display = "block";
           let start_date_time = "{{ start_date|date:'Y-m-d' }} " + selected_date_time[0].id.split('-')[3] + ":00";
 
           for (let service of additional_services) {

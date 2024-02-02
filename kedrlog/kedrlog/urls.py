@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -16,6 +14,7 @@ urlpatterns = [
     path('territory/', page_gallery, name='territory'),
     path('food/', page_gallery, name='food'),
     path('rules/', page_text_content, name='rules'),
+    path('fz152/', page_text_content, name='fz152'),
     path('accessories/', page_text_content, name='accessories'),
     path('price/', page_price, name='price'),
     path('spa/', page_spa, name='spa'),
