@@ -148,15 +148,15 @@
         <input id="user-email" type="email" class="form-control" value="{{ user.email }}" />
       </div>
     </div>
-    <div class="row flex-row justify-content-end mt-3">
-      <div class="col-auto form-check form-switch">
+    <div class="row flex-row justify-content-end mt-3 ms-1">
+      <div class="col-12 col-md-auto form-check form-switch">
         <input class="form-check-input" type="checkbox" id="check-box-fz152" required onchange="CheckRules()">
         <label class="form-check-label" for="check-box-fz152">Даю согласие на обработку своих персональных данных <a href="{% url 'fz152' %}" target="_blank">согласно 152 ФЗ</a></label>
         <span class="required text-danger">*</span>
       </div>
     </div>
-    <div class="row flex-row justify-content-end mt-3">
-      <div class="col-auto form-check form-switch">
+    <div class="row flex-row justify-content-end mt-3 ms-1">
+      <div class="col-12 col-md-auto form-check form-switch">
         <input class="form-check-input" type="checkbox" id="check-box-rules" required onchange="CheckRules()">
         <label class="form-check-label" for="check-box-rules">Соглашаюсь с <a href="{% url 'rules' %}" target="_blank">правилами аренды</a></label>
         <span class="required text-danger">*</span>
@@ -164,7 +164,7 @@
     </div>
     <div class="row mt-3">
       <div class="col-12 text-end">
-        <button class="btn btn-lg btn-success" id="reserve" onclick="CreateOrder()" disabled>Забронировать</button>
+        <button class="btn btn-lg btn-success" id="reserve" onclick="CreateOrder({{ duration }}, {{ house_pk }})" disabled>Забронировать</button>
       </div>
     </div>
   </div>
@@ -455,17 +455,15 @@
           return true;
       }
 
-      function CreateOrder() {
+      function CreateOrder(duration, house_pk) {
           let selected_date_time = document.querySelectorAll('.selected-date-time');
           let start_date = document.querySelector('#start-date');
           {#let start_date = new Date("{{ start_date|date:'Y-m-d' }}");#}
-          let duration = {{ duration }};
           let count_guests = document.querySelector('#count-guests');
           let user_first_name = document.querySelector('#user-first-name');
           let user_last_name = document.querySelector('#user-last-name');
           let user_email = document.querySelector('#user-email');
           let user_phone = document.querySelector('#user-phone');
-          let house_pk = {{ house.pk }};
           let total_price = document.querySelector('#total-price');
           let additional_services = document.querySelectorAll('.total-add-service');
           let additional_services_mass = [];

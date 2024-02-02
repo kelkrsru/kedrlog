@@ -37,8 +37,9 @@ class AdditionalFeaturesAdmin(admin.ModelAdmin):
 
 @admin.register(AdditionalServices)
 class AdditionalServicesAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'active']
+    list_display = ['name', 'price', 'active', 'group', ]
     ordering = ['-active']
+    list_editable = ['group', ]
 
 
 @admin.register(SpaServices)

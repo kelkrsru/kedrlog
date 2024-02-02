@@ -333,8 +333,6 @@ class Reserve(CreatedModel):
         else:
             reserve_end_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
                                                  hour=23, minute=59, second=59)
-        print(f'{reserve_start_time=}')
-        print(f'{reserve_end_time=}')
         while reserve_start_time > timezone.datetime.combine(
                 reserve_date - timezone.timedelta(days=1), timezone.datetime.max.time()):
             start_date_time_busy.add(reserve_start_time - timezone.timedelta(hours=1))
@@ -343,7 +341,6 @@ class Reserve(CreatedModel):
                 reserve_date + timezone.timedelta(days=1), timezone.datetime.min.time()):
             start_date_time_busy.add(reserve_end_time + timezone.timedelta(hours=1))
             reserve_end_time += timezone.timedelta(hours=1)
-        print(f'{start_date_time_busy=}')
 
         reserves = cls.objects.filter(house=reserve_house, start_date_time__range=reserve_date_interval)
         for reserve in reserves:
@@ -405,7 +402,7 @@ class Reserve(CreatedModel):
             delta = start_date_time_busy[i + 1] - start_date_time_busy[i]
             if (delta <= min_interval) and (delta != timezone.timedelta(hours=1)):
                 j = start_date_time_busy[i + 1]
-                while j != start_date_time_busy[i] + timezone.timedelta(hours=1):
+                while j >= start_date_time_busy[i] + timezone.timedelta(hours=1):
                     j -= timezone.timedelta(hours=1)
                     start_date_time_busy_temp.append(j)
         start_date_time_busy += start_date_time_busy_temp
@@ -478,6 +475,12 @@ class AdditionalServices(CreatedModel):
         max_length=20,
         choices=Measure.choices,
         default=Measure.__empty__
+    )
+    group = models.PositiveSmallIntegerField(
+        verbose_name='Группа',
+        help_text='Услуга/товар входит в группу. На странице бронирования можно будет выбрать только один из группы.',
+        blank=True,
+        null=True,
     )
     id_catalog_b24 = models.PositiveIntegerField(
         verbose_name='ID товара/услуги',
