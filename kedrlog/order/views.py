@@ -19,9 +19,9 @@ def index(request):
     """Метод главной страницы."""
     template = 'order/index.html'
 
-    if request.method != 'GET':
+    if request.method != 'POST':
         return render(request, 'error.html', {'error_name': 'Неизвестный тип запроса'})
-    if not all([True if param in request.GET else False for param in ['house', 'date', 'duration']]):
+    if not all([True if param in request.POST else False for param in ['house', 'date', 'duration']]):
         return render(request, 'error.html', {'error_name': 'Ошибка'})
 
     company = Company.objects.get(active=True)
@@ -31,9 +31,9 @@ def index(request):
     if settings_site.reserve_closed and not request.user.is_superuser and not request.user.is_staff:
         return render(request, 'order/reserve_closed.html', {'company': company})
 
-    house = get_object_or_404(House, pk=request.GET.get('house'))
-    date = timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d').date()
-    duration = int(request.GET.get('duration'))
+    house = get_object_or_404(House, pk=request.POST.get('house'))
+    date = timezone.datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
+    duration = int(request.POST.get('duration'))
     rate = house.rate_house.get(active=True)
     price_house = rate.get_price(date)
     price_house_tomorrow = rate.get_price(date + timezone.timedelta(days=1))
@@ -42,7 +42,7 @@ def index(request):
 
     additional_services = AdditionalServices.objects.filter(active=True)
 
-    date_time_range = [{'print': f'{i}:00', 'value': timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d')
+    date_time_range = [{'print': f'{i}:00', 'value': timezone.datetime.strptime(request.POST.get('date'), '%Y-%m-%d')
                         + timezone.timedelta(hours=i)} for i in range(24)]
 
     context = {

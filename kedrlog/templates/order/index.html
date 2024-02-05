@@ -6,7 +6,7 @@
   {% include 'includes/content_page_header.html' with subtitle_h2='Бронирование' subtitle_span='Оформление заказа' %}
 
 
-
+<html style="scroll-behavior: auto;" lang="ru">
   <div class="container content-page-order">
     <div class="row order-selected-house">
       <div class="col-12 col-md-5 d-flex align-items-center">
@@ -168,6 +168,7 @@
       </div>
     </div>
   </div>
+</html>
 {% endblock %}
 
 {% block user_scripts %}
@@ -175,7 +176,26 @@
       function ReloadTableStartDateTime() {
           let date = document.getElementById('start-date');
           let duration = document.getElementById('duration');
-          window.location.href = "{% url 'order:index' %}?house={{ house.pk }}&date=" + date.value + "&duration=" + duration.value + "#start-order";
+          const body = {
+              "csrfmiddlewaretoken": "{{ csrf_token }}",
+              'house': {{ house.pk }},
+              'date': date.value,
+              'duration': duration.value,
+          };
+
+          let form = document.createElement('form');
+          document.body.appendChild(form);
+          form.method = 'post';
+          form.action = "{% url 'order:index' %}#start-order";
+          for (let name in body) {
+              let input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = name;
+              input.value = body[name];
+              form.appendChild(input);
+          }
+          form.submit();
+          document.body.removeChild(form);
       }
 
       function CheckRules() {
