@@ -43,7 +43,6 @@
 
               <div class="house-selector__modal-btn-wrapper">
                 <div class="house-selector__modal-btn-flex-section">
-{#                  <a href="{% url 'order:index' %}?house={{ house.house.pk }}&date={% now "Y-m-d" %}&duration={{ min_time|get_item:house.house.pk }}" class="btn btn-success">Забронировать</a>#}
                   <form method="post" action="{% url 'order:index' %}">
                     {% csrf_token %}
                     <input type="hidden" name="house" value="{{ house.house.pk }}">
@@ -51,7 +50,6 @@
                     <input type="hidden" name="duration" value="{{ min_time|get_item:house.house.pk }}">
                     <input type="submit" class="btn btn-success" value="Забронировать">
                   </form>
-                  {#                  <a href="tel:{{ company.phone|clear_phone }}" class="btn btn-success">Забронировать</a>#}
                 </div>
                 <span class="house-selector__modal-btn-flex-section">
                   {% for item in house.house.gallery_items.all %}
@@ -106,9 +104,10 @@
               <form method="post" action="{% url 'order:index' %}">
                 {% csrf_token %}
                 <input type="hidden" name="house" value="{{ house.house.pk }}">
-                <input type="submit" class="btn btn-success" value="Бронь">
+                <input type="hidden" name="date" value="{% now "Y-m-d" %}">
+                <input type="hidden" name="duration" value="{{ min_time|get_item:house.house.pk }}">
+                <input type="submit" class="btn btn-success" value="Забронировать">
               </form>
-              <a href="{% url 'order:index' %}?house={{ house.house.pk }}&date={% now "Y-m-d" %}&duration={{ min_time|get_item:house.house.pk }}" class="btn btn-success">Забронировать</a>
             </div>
             <span class="order__gallery house-selector__modal-btn-flex-section">
               {% for item in house.house.gallery_items.all %}
