@@ -1,73 +1,75 @@
 from django.contrib import admin
-
-from staticpages.models import GalleryHouses, GalleryTerritory, GalleryFood, TextContentRules, TextContentAccessories, \
-    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa, TextContentFz152
+from staticpages.models import (ContentPrice, ContentSpa, GalleryFood,
+                                GalleryHouses, GalleryTerritory,
+                                TextContentAccessories, TextContentCorporate,
+                                TextContentFz152, TextContentRent,
+                                TextContentRules)
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
 
 FIELDSETS_FOR_GALLERY = [
-        (
-            None,
-            {
-                "fields": ["active", "name", "header", "second_header", "items"],
-            },
-        ),
-        (
-            "Настройки для SEO",
-            FIELDS_SEO
-        ),
-    ]
+    (
+        None,
+        {
+            "fields": ["active", "name", "header", "second_header", "items"],
+        },
+    ),
+    (
+        "Настройки для SEO",
+        FIELDS_SEO
+    ),
+]
 
 FIELDSETS_FOR_TEXT_CONTENT = [
-        (
-            None,
-            {
-                "fields": ["active", "name", "header", "second_header", "text"],
-            },
-        ),
-        (
-            "Настройки для SEO",
-            FIELDS_SEO
-        ),
-    ]
+    (
+        None,
+        {
+            "fields": ["active", "name", "header", "second_header", "text"],
+        },
+    ),
+    (
+        "Настройки для SEO",
+        FIELDS_SEO
+    ),
+]
 
 FIELDSETS_FOR_PRICE = [
-        (
-            None,
-            {
-                "fields": ["active", "name", "header", "second_header", "header_image"],
-            },
-        ),
-        (
-            'Основные услуги',
-            {
-                "fields": ["header_house", "description_house", "house"],
-            },
-        ),
-        (
-            'Дополнительные услуги',
-            {
-                "fields": ["header_service", "description_service", "service"],
-            },
-        ),
-        (
-            "Настройки для SEO",
-            FIELDS_SEO
-        ),
-    ]
+    (
+        None,
+        {
+            "fields": ["active", "name", "header", "second_header", "header_image"],
+        },
+    ),
+    (
+        'Основные услуги',
+        {
+            "fields": ["header_house", "description_house", "house"],
+        },
+    ),
+    (
+        'Дополнительные услуги',
+        {
+            "fields": ["header_service", "description_service", "service"],
+        },
+    ),
+    (
+        "Настройки для SEO",
+        FIELDS_SEO
+    ),
+]
 
 FIELDSETS_FOR_SPA = [
-        (
-            None,
-            {
-                "fields": ["active", "name", "header", "second_header", "spa_service"],
-            },
-        ),
-        (
-            "Настройки для SEO",
-            FIELDS_SEO
-        ),
-    ]
+    (
+        None,
+        {
+            "fields": ["active", "name", "header", "second_header", "spa_service"],
+        },
+    ),
+    (
+        "Настройки для SEO",
+        FIELDS_SEO
+    ),
+]
 
 
 @admin.register(GalleryHouses)

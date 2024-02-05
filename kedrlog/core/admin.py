@@ -1,6 +1,9 @@
 from django.contrib import admin
-from .models import Company, House, Rate, Reserve, AdditionalFeatures, AdditionalServices, WeekendDays, SocialNetworks, \
-    ReserveServices, SpaServices, PriceForSpaServices, SettingsBitrix24, SettingsSite
+
+from .models import (AdditionalFeatures, AdditionalServices, Company, House,
+                     PriceForSpaServices, Rate, Reserve, ReserveServices,
+                     SettingsBitrix24, SettingsSite, SocialNetworks,
+                     SpaServices, WeekendDays)
 
 admin.site.enable_nav_sidebar = False
 

@@ -1,4 +1,3 @@
-from django.contrib import admin
 #
 # from .models import Portals
 #
@@ -14,9 +13,9 @@ from django.contrib import admin
 #
 # admin.site.register(Portals, PortalsAdmin)
 from common.models import GalleryItem
+from django.contrib import admin
 
 
 @admin.register(GalleryItem)
 class GalleryItemAdmin(admin.ModelAdmin):
     list_display = ['name', ]
-

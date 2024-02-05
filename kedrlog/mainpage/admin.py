@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import *
+from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
+                             ContentBlockMain, ContentBlockRoundedMenuItem,
+                             ContentBlockService, ContentBlockYandexMap,
+                             HouseShowBooking)
 
 
 @admin.register(ContentBlockMain)
@@ -35,7 +38,7 @@ class HouseShowBookingInline(admin.TabularInline):
 class ContentBlockBookingAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
-    inlines = [HouseShowBookingInline,]
+    inlines = [HouseShowBookingInline, ]
 
 
 @admin.register(HouseShowBooking)
