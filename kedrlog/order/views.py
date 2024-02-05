@@ -28,7 +28,7 @@ def index(request):
     settings_site = get_object_or_404(SettingsSite, active=True)
     if settings_site.reserve_closed_all and not request.user.is_superuser:
         return render(request, 'order/reserve_closed.html', {'company': company})
-    if settings_site.reserve_closed and (not request.user.is_superuser or not request.user.is_staff):
+    if settings_site.reserve_closed and not request.user.is_superuser and not request.user.is_staff:
         return render(request, 'order/reserve_closed.html', {'company': company})
 
     house = get_object_or_404(House, pk=request.GET.get('house'))
