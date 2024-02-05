@@ -1,8 +1,10 @@
-from django.shortcuts import render, get_object_or_404
-
 from core.models import Company
-from staticpages.models import GalleryHouses, GalleryTerritory, GalleryFood, TextContentRules, TextContentAccessories, \
-    TextContentRent, TextContentCorporate, ContentPrice, ContentSpa, TextContentFz152
+from django.shortcuts import get_object_or_404, render
+from staticpages.models import (ContentPrice, ContentSpa, GalleryFood,
+                                GalleryHouses, GalleryTerritory,
+                                TextContentAccessories, TextContentCorporate,
+                                TextContentFz152, TextContentRent,
+                                TextContentRules)
 
 
 def page_gallery(request):
@@ -25,8 +27,7 @@ def page_gallery(request):
         'company': company,
         'gallery': gallery
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 def page_text_content(request):
@@ -53,8 +54,7 @@ def page_text_content(request):
         'company': company,
         'text_content': text_content
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 def page_price(request):
@@ -68,8 +68,7 @@ def page_price(request):
         'company': company,
         'price_content': price_content
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 def page_spa(request):
@@ -83,5 +82,4 @@ def page_spa(request):
         'company': company,
         'spa_content': spa_content
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)

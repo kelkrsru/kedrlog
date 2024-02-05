@@ -1,14 +1,12 @@
-from pprint import pprint
 from urllib.parse import urlparse
 
-from ckeditor.fields import RichTextField
-from django.contrib.auth import get_user_model
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
-
-from common.models import CreatedModel, GalleryItem
 from bitrix24 import Bitrix24
+from ckeditor.fields import RichTextField
+from common.models import CreatedModel, GalleryItem
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -368,7 +366,7 @@ class Reserve(CreatedModel):
     @classmethod
     def _get_start_allow(cls, start_date_time_busy, duration, house_cleaning, reserve_date):
         """Метод, который формирует множество из времени начало парения, разрешенных для бронирования."""
-        min_interval = timezone.timedelta(hours=(duration + house_cleaning))
+        # timezone.timedelta(hours=(duration + house_cleaning))
         reserve_date = timezone.datetime.combine(reserve_date - timezone.timedelta(days=1),
                                                  timezone.datetime.min.time())
         date_time_range_3days = {reserve_date + timezone.timedelta(hours=i) for i in range(72)}
@@ -424,8 +422,8 @@ class Reserve(CreatedModel):
         """Метод проверки времени на занятость."""
         reserve_date = start_date_time.date()
         start_date_time_busy = cls._get_start_busy(reserve_date, reserve_house)
-        reserve_interval = [start_date_time + timezone.timedelta(hours=x) for x in range(duration +
-                                                                                         reserve_house.cleaning)]
+        reserve_interval = [start_date_time + timezone.timedelta(hours=x) for x in range(duration
+                                                                                         + reserve_house.cleaning)]
 
         for date_time in reserve_interval:
             date_time = date_time.replace(tzinfo=None)

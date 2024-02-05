@@ -1,11 +1,12 @@
-from django.contrib.auth import views as auth_views, get_user_model
-
-from django.shortcuts import get_object_or_404, render
-from django.views.generic import CreateView, UpdateView
-from django.urls import reverse_lazy
-from .forms import CreationForm, PasswordResetFormValidation, ChangeForm, LoginForm
 from core.models import Company
+from django.contrib.auth import get_user_model
+from django.contrib.auth import views as auth_views
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, UpdateView
 
+from .forms import (ChangeForm, CreationForm, LoginForm,
+                    PasswordResetFormValidation)
 
 EXTRA_CONTEXT = {'company': get_object_or_404(Company, active=True)}
 User = get_user_model()

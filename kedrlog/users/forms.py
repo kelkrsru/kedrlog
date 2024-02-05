@@ -1,8 +1,9 @@
 import re
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordResetForm, UserChangeForm, AuthenticationForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
+                                       UserChangeForm, UserCreationForm)
 
 User = get_user_model()
 
@@ -17,7 +18,7 @@ class LoginForm(AuthenticationForm):
         if len(username) != 11:
             msg = "Вы указали некорректное имя пользователя."
             self.add_error('username', msg)
-            return
+            return None
         return username
 
 
@@ -41,11 +42,11 @@ class CreationForm(UserCreationForm):
         if len(phone_num) != 11:
             msg = "Вы указали некорректный номер телефона."
             self.add_error('phone', msg)
-            return
+            return None
         if User.objects.filter(username=phone_num).exists():
             msg = "Пользователь с данным телефоном уже существует."
             self.add_error('phone', msg)
-            return
+            return None
         return phone_str
 
     def save(self, commit=True):
@@ -80,11 +81,11 @@ class ChangeForm(UserChangeForm):
         if len(phone_num) != 11:
             msg = "Вы указали неверный номер телефона."
             self.add_error('phone', msg)
-            return
+            return None
         if User.objects.filter(username=phone_num).exists():
             msg = "Данный номер телефона уже привязан к другому пользователю."
             self.add_error('phone', msg)
-            return
+            return None
         return phone_str
 
     def save(self, commit=True):

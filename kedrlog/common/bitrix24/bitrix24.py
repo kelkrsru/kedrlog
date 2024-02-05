@@ -48,10 +48,9 @@ class ObjB24:
     def _check_error(result):
         if 'error' in result:
             raise RuntimeError(result['error'], result['error_description'])
-        elif 'result' in result:
+        if 'result' in result:
             return result['result']
-        else:
-            raise RuntimeError('Error', 'No description error')
+        raise RuntimeError('Error', 'No description error')
 
 
 class ListEntitiesB24(ObjB24):

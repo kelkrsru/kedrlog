@@ -1,8 +1,8 @@
-from django.shortcuts import render
-
 from core.models import Company
-from mainpage.models import ContentBlockMain, ContentBlockInfrastructure, ContentBlockService, ContentBlockYandexMap, \
-    ContentBlockBooking
+from django.shortcuts import render
+from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
+                             ContentBlockMain, ContentBlockService,
+                             ContentBlockYandexMap)
 
 
 def index(request):
@@ -33,5 +33,4 @@ def index(request):
         'min_cost': min_cost,
         'min_time': min_time
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)

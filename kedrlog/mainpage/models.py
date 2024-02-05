@@ -1,8 +1,8 @@
-from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
-from django.db import models
-
 from common.models import CreatedModel
 from core.models import House
+from django.core.validators import (FileExtensionValidator, MaxValueValidator,
+                                    MinValueValidator)
+from django.db import models
 
 
 class ContentBlock(CreatedModel):

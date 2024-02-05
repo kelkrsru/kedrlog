@@ -14,8 +14,8 @@
   <nav class="nav header__main">
     <ul class="pt-5">
       <li><a href="{% url 'personal:index' %}">Ваш личный кабинет</a></li>
-      <li><a href="#">Услуги</a></li>
-      <li><a href="#">Контакты</a></li>
+      <li><a href="{% url 'price' %}">Услуги</a></li>
+      <li><a href="{% url 'mainpage:index' %}#contacts">Контакты</a></li>
       {% if user.is_authenticated %}
         <li><a href="{% url 'accounts:logout' %}">Выйти</a></li>
       {% endif %}

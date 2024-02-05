@@ -3,15 +3,14 @@ import json
 
 from bitrix24 import Bitrix24
 from bitrix24.exceptions import BitrixError
+from common.views import get_clean_phone
+from core.models import (AdditionalServices, Company, House, Rate, Reserve, ReserveServices, SettingsBitrix24,
+                         SettingsSite)
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.utils import timezone
-
-from common.views import get_clean_phone
-from core.models import Company, House, Reserve, AdditionalServices, ReserveServices, SettingsBitrix24, Rate, \
-    SettingsSite
 
 User = get_user_model()
 
@@ -43,8 +42,8 @@ def index(request):
 
     additional_services = AdditionalServices.objects.filter(active=True)
 
-    date_time_range = [{'print': f'{i}:00', 'value': timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d') +
-                        timezone.timedelta(hours=i)} for i in range(24)]
+    date_time_range = [{'print': f'{i}:00', 'value': timezone.datetime.strptime(request.GET.get('date'), '%Y-%m-%d')
+                        + timezone.timedelta(hours=i)} for i in range(24)]
 
     context = {
         'company': company,
@@ -61,8 +60,7 @@ def index(request):
         'str_start_stop': {'start': [1, 9, 17], 'stop': [8, 16, 24]},
         'additional_services': additional_services
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 # def update_start_date_time_table(request):
@@ -94,8 +92,8 @@ def update_total_section_house(request):
     duration = timezone.timedelta(hours=int(request.POST.get('duration')))
     end_date_time = start_date_time + duration
     house = get_object_or_404(House, pk=request.POST.get('house_id'))
-    house_string = f'Аренда {house.name} c {start_date_time.strftime("%d.%m.%Y %H:%M")} по ' \
-                   f'{end_date_time.strftime("%d.%m.%Y %H:%M")}'
+    house_string = (f'Аренда {house.name} c {start_date_time.strftime("%d.%m.%Y %H:%M")} по '
+                    f'{end_date_time.strftime("%d.%m.%Y %H:%M")}')
     rate = house.rate_house.get(active=True)
     # Выясняем цену по прайсу с учетом перехода на следующий день
     if start_date_time.date() != end_date_time.date():
@@ -204,8 +202,8 @@ def new(request):
                 rate.is_day_of(start_date): (end_date_time.replace(hour=0) - start_date_time).total_seconds() / 3600
             })
             data.append({
-                rate.is_day_of(end_date): order.duration - ((end_date_time.replace(hour=0) -
-                                                             start_date_time).total_seconds() / 3600)
+                rate.is_day_of(end_date): order.duration - ((end_date_time.replace(hour=0)
+                                                             - start_date_time).total_seconds() / 3600)
             })
         else:
             data.append({

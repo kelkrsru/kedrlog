@@ -1,10 +1,8 @@
-from datetime import datetime
 
+from core.models import Company, Reserve
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
-
-from core.models import Company, Reserve
 
 
 @login_required
@@ -17,8 +15,7 @@ def index(request):
     context = {
         'company': company,
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 @login_required
@@ -35,8 +32,7 @@ def reserve(request):
         'company': company,
         'reserves': reserves
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)
 
 
 @login_required
@@ -49,5 +45,4 @@ def bonus(request):
     context = {
         'company': company,
     }
-    response = render(request, template, context)
-    return response
+    return render(request, template, context)

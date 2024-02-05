@@ -1,5 +1,5 @@
-from common.models import Gallery, TextContent, Content
-from core.models import House, AdditionalServices, SpaServices
+from common.models import Content, Gallery, TextContent
+from core.models import AdditionalServices, House, SpaServices
 from django.db import models
 
 
