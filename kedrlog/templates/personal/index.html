@@ -33,8 +33,12 @@
     </table>
   </div>
   <div class="row ms-5 flex-row justify-content-end">
-    <a href="{% url 'accounts:change_user' %}" class="btn btn-primary col-6 col-lg-4 me-3">Изменить данные</a>
-    <a href="{% url 'accounts:password_change' %}" class="btn btn-success col-6 col-lg-4">Изменить пароль</a>
+    <div class="col-6 col-md-4 col-xl-4 text-end">
+      <a href="{% url 'accounts:change_user' %}" class="btn btn-primary">Изменить данные</a>
+    </div>
+    <div class="col-6 col-md-4 col-xl-3 text-end">
+      <a href="{% url 'accounts:password_change' %}" class="btn btn-success">Изменить пароль</a>
+    </div>
   </div>
 {% endblock %}
 
