@@ -57,7 +57,7 @@ def index(request):
         'price_house_tomorrow': price_house_tomorrow,
         'now_date': timezone.datetime.now(),
         'date_time_range': date_time_range,
-        'str_start_stop': {'start': [1, 9, 17], 'stop': [8, 16, 24]},
+        'str_start_stop': {'start': [1, 7, 13, 19], 'stop': [6, 12, 18, 24]},
         'additional_services': additional_services
     }
     return render(request, template, context)

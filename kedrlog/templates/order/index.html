@@ -32,53 +32,56 @@
       <h4>Дата и время парения</h4>
     </div>
     <div class="row">
-      <div class="col-12 col-lg-4">
-        <div>
+        <div class="col-auto">
           <label for="start-date" class="fw-bold mb-3">1. Выберите дату:</label>
           <input id="start-date" type="date" class="form-control" min="{% now "Y-m-d" %}"
-                 value="{{ start_date|date:"Y-m-d" }}" onchange="ReloadTableStartDateTime(this)">
+                 value="{{ start_date|date:"Y-m-d" }}" onchange="ReloadTableStartDateTime()">
         </div>
-        <div>
-          <label for="duration" class="fw-bold mb-3 mt-3">2. Продолжительность:</label>
-          <input id="duration" type="number" class="form-control" value="{{ duration }}" step="1" min="{{ rate.min_time }}" max="23"
-                 onchange="ReloadTableStartDateTime(this)">
+        <div class="col-auto">
+          <label for="duration" class="fw-bold mb-3">2. Продолжительность:</label>
+          {% include 'includes/quantity_inner.html' with id='duration' value=duration min_value=rate.min_time max_value="23" %}
         </div>
-        <div class="mb-3">
-          <label for="count-guests" class="fw-bold mb-3 mt-3">3. Количество гостей:</label>
-          <input id="count-guests" type="number" class="form-control" value="{{ rate.guests_in_price }}" step="1" min="1" max="{{ house.max_guests }}" onchange="UpdateTotalSectionGuest(this)">
+
+        <div class="col-auto">
+          <label for="count-guests" class="fw-bold mb-3">3. Количество гостей:</label>
+          {% include 'includes/quantity_inner.html' with id='count-guests' value=rate.guests_in_price min_value='1' max_value=house.max_guests %}
         </div>
-      </div>
-      <div id="start-date-time-table" class="col-12 col-lg-8">
+
+    </div>
+    <div class="row">
+      <div id="start-date-time-table" class="col-12">
         <div class="col-12">
           <label class="fw-bold mb-3">4. Выберите время начала парения:</label>
         </div>
         {% load user_filters %}
         {% for date_time in date_time_range %}
           {% if forloop.counter in str_start_stop.start %}
-            <div class="row mb-3 flex-row justify-content-center">
+            <div class="row mb-3 flex-row justify-content-start">
           {% endif %}
         {#          <p>{{ date_time.value }}</p>#}
-        {% if date_time.value in start_date_time_busy %}
-          <button id="start-date-time-{{ forloop.counter0 }}"
-                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
-        {% elif date_time.value <= now_date %}
-          <button id="start-date-time-{{ forloop.counter0 }}"
-                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
-        {% elif date_time.value in start_date_time_allow %}
-          <button id="start-date-time-{{ forloop.counter0 }}"
-                  class="btn btn-outline-success col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"
-                  onclick="CheckStartDateTime({{ forloop.counter0 }})">{{ date_time.print }}<br><span
-            class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
-        {% else %}
-          <button id="start-date-time-{{ forloop.counter0 }}"
-                  class="btn btn-outline-dark col-4 col-md-1 me-3 start-date-time" value="{{ price_house }}"
-                  disabled>{{ date_time.print }}<br><span class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
-        {% endif %}
-        {% if forloop.counter in str_start_stop.stop %}
+          <div class="col-6 col-md-2">
+            {% if date_time.value in start_date_time_busy %}
+              <button id="start-date-time-{{ forloop.counter0 }}"
+                      class="btn btn-outline-dark start-date-time"
+                      disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
+            {% elif date_time.value <= now_date %}
+              <button id="start-date-time-{{ forloop.counter0 }}"
+                      class="btn btn-outline-dark start-date-time"
+                      disabled>{{ date_time.print }}<br><span class="fw-bold">X</span></button>
+            {% elif date_time.value in start_date_time_allow %}
+              <button id="start-date-time-{{ forloop.counter0 }}"
+                      class="btn btn-outline-success start-date-time" value="{{ price_house }}"
+                      onclick="CheckStartDateTime({{ forloop.counter0 }})">{{ date_time.print }}<br><span
+                class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+            {% else %}
+              <button id="start-date-time-{{ forloop.counter0 }}"
+                      class="btn btn-outline-dark start-date-time" value="{{ price_house }}"
+                      disabled>{{ date_time.print }}<br><span class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+            {% endif %}
           </div>
-        {% endif %}
+          {% if forloop.counter in str_start_stop.stop %}
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -92,9 +95,16 @@
           <div class="col-auto">
             <label for="add-service-{{ service.id }}"
                    class="col-form-label">{{ service.name }} (+{{ service.price|floatformat }} ₽)</label>
-            <input type="number" class="form-control" id="add-service-{{ service.id }}" step="1" value="0" min="0"
-                   {% if service.measure == 'service' %}max="1"{% endif %}
-                   onchange="UpdateTotalSectionAdditionalServices(this)">
+{#            <input type="number" class="form-control" id="add-service-{{ service.id }}" step="1" value="0" min="0"#}
+{#                   {% if service.measure == 'service' %}max="1"{% endif %}#}
+{#                   onchange="UpdateTotalSectionAdditionalServices(this)">#}
+            {% with input_id=service.id|stringformat:"i" %}
+              {% if service.measure == 'service' %}
+                {% include 'includes/quantity_inner.html' with id='add-service-'|add:input_id value="0" min_value='0' max_value="1" %}
+              {% else %}
+                {% include 'includes/quantity_inner.html' with id='add-service-'|add:input_id value="0" min_value='0' max_value="99" %}
+              {% endif %}
+            {% endwith %}
           </div>
         {% endfor %}
       </div>
@@ -289,12 +299,13 @@
           });
       }
 
-      function UpdateTotalSectionAdditionalServices(object) {
+      function UpdateTotalSectionAdditionalServices(input_id) {
           {#Функция обновления итоговой таблицы при выборе дополнительных услуг#}
+          let input = document.querySelector('#' + input_id);
           let tbody = document.querySelector('#total-section-body');
-          let old_row = document.querySelector('#total-' + object.id);
+          let old_row = document.querySelector('#total-' + input.id);
           if (old_row) {
-              if (object.value === '0') {
+              if (input.value === '0') {
                   old_row.remove();
                   UpdateTotal();
                   return;
@@ -304,13 +315,13 @@
                   type: "POST",
                   data: {
                       "csrfmiddlewaretoken": "{{ csrf_token }}",
-                      "service_id": object.id.split('-')[2],
-                      "quantity": object.value,
+                      "service_id": input.id.split('-')[2],
+                      "quantity": input.value,
                   },
                   success: function (response) {
                       if (response.result) {
                           old_row.cells[0].textContent = response.service_name;
-                          old_row.cells[1].textContent = object.value + ' шт.';
+                          old_row.cells[1].textContent = input.value + ' шт.';
                           old_row.cells[2].textContent = response.service_price;
                           UpdateTotal();
                       }
@@ -334,16 +345,16 @@
                   type: "POST",
                   data: {
                       "csrfmiddlewaretoken": "{{ csrf_token }}",
-                      "service_id": object.id.split('-')[2],
-                      "quantity": object.value,
+                      "service_id": input.id.split('-')[2],
+                      "quantity": input.value,
                   },
                   success: function (response) {
                       if (response.result) {
                           let new_row = tbody.insertRow(-1);
-                          new_row.id = 'total-' + object.id;
+                          new_row.id = 'total-' + input.id;
                           new_row.classList.add('total-add-service');
                           new_row.insertCell(0).appendChild(document.createTextNode(response.service_name));
-                          new_row.insertCell(1).appendChild(document.createTextNode(object.value + ' шт.'));
+                          new_row.insertCell(1).appendChild(document.createTextNode(input.value + ' шт.'));
                           new_row.insertCell(2).appendChild(document.createTextNode(response.service_price));
                           UpdateTotal();
                       }
@@ -365,11 +376,13 @@
           }
       }
 
-      function UpdateTotalSectionGuest(object) {
+      function UpdateTotalSectionGuest(id_input) {
+          {#alert(id_input);#}
           {#Функция обновления итоговой таблицы при дополнительных гостях#}
           let tbody = document.querySelector('#total-section-body');
           let old_row = document.querySelector('#total-guest-price');
-          const object_value = parseInt(object.value);
+          let count_guests = document.querySelector('#' + id_input);
+          const object_value = parseInt(count_guests.value);
           const count_additional_guest = object_value - {{ rate.guests_in_price }}
           if (old_row) {
               if (object_value <= {{ rate.guests_in_price }}) {
@@ -553,6 +566,54 @@
       $("[type='number']").keypress(function (evt) {
           evt.preventDefault();
       });
+
+      // Убавляем кол-во по клику
+    $('.quantity_inner .bt_minus').click(function() {
+        let $input = $(this).parent().find('.quantity');
+        let count = parseInt($input.val()) - 1;
+        count = count < parseInt($input.data('min-count')) ? parseInt($input.data('min-count')) : count;
+        $input.val(count);
+        if ($input.attr('id') === 'count-guests') {
+            UpdateTotalSectionGuest($input.attr('id'));
+        }
+        if ($input.attr('id') === 'duration') {
+            ReloadTableStartDateTime();
+        }
+        if ($input.attr('id').match(/add-service.*/)) {
+            UpdateTotalSectionAdditionalServices($input.attr('id'));
+        }
+    });
+    // Прибавляем кол-во по клику
+    $('.quantity_inner .bt_plus').click(function() {
+        let $input = $(this).parent().find('.quantity');
+        let count = parseInt($input.val()) + 1;
+        count = count > parseInt($input.data('max-count')) ? parseInt($input.data('max-count')) : count;
+        $input.val(parseInt(count));
+        if ($input.attr('id') === 'count-guests') {
+            UpdateTotalSectionGuest($input.attr('id'));
+        }
+        if ($input.attr('id') === 'duration') {
+            ReloadTableStartDateTime();
+        }
+        if ($input.attr('id').match(/add-service.*/)) {
+            UpdateTotalSectionAdditionalServices($input.attr('id'));
+        }
+    });
+    // Убираем все лишнее и невозможное при изменении поля
+    $('.quantity_inner .quantity').bind("change keyup input click", function() {
+        if (this.value.match(/[^0-9]/g)) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        }
+        if (this.value === "") {
+            this.value = parseInt($(this).data('min-count'));
+        }
+        if (this.value < parseInt($(this).data('min-count'))) {
+            this.value = parseInt($(this).data('min-count'));
+        }
+        if (this.value > parseInt($(this).data('max-count'))) {
+            this.value = parseInt($(this).data('max-count'));
+        }
+    });
   </script>
 {% endblock %}
 
