@@ -31,7 +31,7 @@
                     <td>{{ house.floor }}</td>
                     {% for rate in house.rate_house.all %}
                       {% if rate.active %}
-                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }} <i class="fa fa-ruble">;{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }} <i class="fa fa-ruble">{% else %}Не указано{% endif %}</td>
                         <td class="text-color-green">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
                       {% endif %}
                     {% endfor %}
