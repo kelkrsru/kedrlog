@@ -103,7 +103,7 @@ def update_total_section_house(request):
         house_price += rate.get_price(end_date_time) * decimal.Decimal(delta_end_day.total_seconds() / 3600)
     else:
         house_price = rate.get_price(start_date_time) * int(request.POST.get('duration'))
-    return JsonResponse({'result': True, 'house_string': house_string, 'house_price': f'{house_price} ₽'})
+    return JsonResponse({'result': True, 'house_string': house_string, 'house_price': f'{house_price}'})
 
 
 def update_total_section_service(request):
@@ -115,7 +115,7 @@ def update_total_section_service(request):
     quantity = request.POST.get('quantity')
     service = get_object_or_404(AdditionalServices, pk=service_id)
     price = service.price * int(quantity)
-    return JsonResponse({'result': True, 'service_name': service.name, 'service_price': f'{price} ₽'})
+    return JsonResponse({'result': True, 'service_name': service.name, 'service_price': f'{price}'})
 
 
 def new(request):

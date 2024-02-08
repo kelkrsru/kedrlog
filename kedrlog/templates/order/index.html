@@ -72,11 +72,11 @@
               <button id="start-date-time-{{ forloop.counter0 }}"
                       class="btn btn-outline-success start-date-time" value="{{ price_house }}"
                       onclick="CheckStartDateTime({{ forloop.counter0 }})">{{ date_time.print }}<br><span
-                class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+                class="fw-bold">{{ price_house|floatformat }} <i class="fa fa-ruble"></i></span></button>
             {% else %}
               <button id="start-date-time-{{ forloop.counter0 }}"
                       class="btn btn-outline-dark start-date-time" value="{{ price_house }}"
-                      disabled>{{ date_time.print }}<br><span class="fw-bold">{{ price_house|floatformat }} ₽</span></button>
+                      disabled>{{ date_time.print }}<br><span class="fw-bold">{{ price_house|floatformat }} <i class="fa fa-ruble"></i></span></button>
             {% endif %}
           </div>
           {% if forloop.counter in str_start_stop.stop %}
@@ -94,10 +94,7 @@
         {% for service in additional_services %}
           <div class="col-auto">
             <label for="add-service-{{ service.id }}"
-                   class="col-form-label">{{ service.name }} (+{{ service.price|floatformat }} ₽)</label>
-{#            <input type="number" class="form-control" id="add-service-{{ service.id }}" step="1" value="0" min="0"#}
-{#                   {% if service.measure == 'service' %}max="1"{% endif %}#}
-{#                   onchange="UpdateTotalSectionAdditionalServices(this)">#}
+                   class="col-form-label">{{ service.name }} (+{{ service.price|floatformat }} <i class="fa fa-ruble"></i>)</label>
             {% with input_id=service.id|stringformat:"i" %}
               {% if service.measure == 'service' %}
                 {% include 'includes/quantity_inner.html' with id='add-service-'|add:input_id value="0" min_value='0' max_value="1" %}
@@ -127,7 +124,7 @@
           <tr>
             <td></td>
             <td class="order-page-total-price-text">Итого:</td>
-            <td id="total-price" class="order-page-total-price-value">0.00 ₽</td>
+            <td id="total-price" class="order-page-total-price-value">0.00 <i class="fa fa-ruble"></i></td>
           </tr>
           </tfoot>
         </table>
@@ -248,17 +245,20 @@
               const count = id + Number(duration) - 24;
               let div_table = document.querySelector('#start-date-time-table');
               let div_row = document.createElement('div');
-              div_row.classList.add('row', 'mb-3', 'flex-row', 'justify-content-center');
+              div_row.classList.add('row', 'mb-3', 'flex-row', 'justify-content-start');
               div_row.id = 'temp-row';
               div_table.appendChild(div_row);
 
               for (i = 0; i < count; ++i) {
+                  let div = document.createElement('div');
+                  div.classList.add('col-6', 'col-md-2');
+                  div_row.appendChild(div);
                   let button = document.createElement('button');
-                  button.classList.add('btn', 'btn-outline-success', 'col-4', 'col-md-1', 'me-3', 'start-date-time');
-                  button.innerHTML = '0' + i + ':00<br><span class="fw-bold">{{ price_house_tomorrow|floatformat }} ₽</span>';
+                  button.classList.add('btn', 'btn-outline-success', 'start-date-time');
+                  button.innerHTML = '0' + i + ':00<br><span class="fw-bold">{{ price_house_tomorrow|floatformat }} <i class="fa fa-ruble"></i></span>';
                   button.style.backgroundColor = '#5c703e';
                   button.style.color = 'white';
-                  div_row.appendChild(button);
+                  div.appendChild(button);
               }
           }
           UpdateTotalSectionHouse(id);
@@ -280,7 +280,7 @@
                   if (response.result) {
                       document.querySelector('#total-house-desc').textContent = response.house_string;
                       document.querySelector('#total-house-quantity').textContent = '1 усл.';
-                      document.querySelector('#total-house-price').textContent = response.house_price;
+                      document.querySelector('#total-house-price').innerHTML = response.house_price;
                       UpdateTotal();
                   }
                   else {
@@ -322,7 +322,7 @@
                       if (response.result) {
                           old_row.cells[0].textContent = response.service_name;
                           old_row.cells[1].textContent = input.value + ' шт.';
-                          old_row.cells[2].textContent = response.service_price;
+                          old_row.cells[2].innerHTML = response.service_price;
                           UpdateTotal();
                       }
                       else {
@@ -391,7 +391,7 @@
                   return;
               }
               old_row.cells[1].textContent = count_additional_guest + ' чел.';
-              old_row.cells[2].textContent = (parseFloat({{ rate.additional_guest_price }}) * count_additional_guest).toFixed(2) + ' ₽';
+              old_row.cells[2].textContent = (parseFloat({{ rate.additional_guest_price }}) * count_additional_guest).toFixed(2) + ' <i class="fa fa-ruble"></i>';
               UpdateTotal();
           }
           else if (object_value > {{ rate.guests_in_price }}) {
@@ -399,7 +399,7 @@
               new_row.id = 'total-guest-price';
               new_row.insertCell(0).appendChild(document.createTextNode('Доплата за дополнительного гостя'));
               new_row.insertCell(1).appendChild(document.createTextNode(count_additional_guest + ' чел.'));
-              new_row.insertCell(2).appendChild(document.createTextNode('{{ rate.additional_guest_price }} ₽'.replace(',','.')));
+              new_row.insertCell(2).appendChild(document.createTextNode('{{ rate.additional_guest_price }} <i class="fa fa-ruble"></i>'.replace(',','.')));
               UpdateTotal();
           }
       }
@@ -414,8 +414,7 @@
                   total += parseFloat(elem.cells[2].textContent.split(' ')[0]);
               }
           }
-
-          document.querySelector('#total-price').textContent = total.toFixed(2) + ' ₽';
+          document.querySelector('#total-price').innerHTML = total.toFixed(2) + " <i class='fa fa-ruble'></i>";
       }
 
       function ValidateOrder(first_name, last_name, phone, email, start_date) {
@@ -560,11 +559,6 @@
 
       $("#modal-success").on("hidden.bs.modal", function () {
           window.location.replace("{% url 'mainpage:index' %}");
-      });
-
-      {#Запрещает ручной ввод в input type=number#}
-      $("[type='number']").keypress(function (evt) {
-          evt.preventDefault();
       });
 
       // Убавляем кол-во по клику

@@ -31,8 +31,8 @@
                     <td>{{ house.floor }}</td>
                     {% for rate in house.rate_house.all %}
                       {% if rate.active %}
-                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }}&#8381;{% else %}Не указано{% endif %}</td>
-                        <td class="text-color-green">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }}₽{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }} <i class="fa fa-ruble">;{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
                       {% endif %}
                     {% endfor %}
                   </tr>
@@ -54,7 +54,7 @@
                   <tr>
                     <td>{{ service.name }}</td>
 {#                    <td>{{ service.get_measure_display }}</td>#}
-                    <td class="text-color-green">{{ service.price|floatformat }}₽</td>
+                    <td class="text-color-green">{{ service.price|floatformat }} <i class="fa fa-ruble"></i></td>
                   </tr>
                 {% endfor %}
               </tbody>

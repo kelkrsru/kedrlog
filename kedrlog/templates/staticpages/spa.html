@@ -76,7 +76,7 @@
       function GetPrice(object) {
           const spa_service_id = object.id.split('-')[2];
           let price_p = document.querySelector("#price-price-" + spa_service_id);
-          price_p.textContent = "Стоимость: " + object.value.split(',')[0] + " ₽";
+          price_p.innerHTML = "Стоимость: " + object.value.split(',')[0] + " <i class='fa fa-ruble'></i>";
       }
 
       function removeAll(selectBox) {
