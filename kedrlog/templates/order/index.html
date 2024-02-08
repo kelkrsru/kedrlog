@@ -391,7 +391,7 @@
                   return;
               }
               old_row.cells[1].textContent = count_additional_guest + ' чел.';
-              old_row.cells[2].textContent = (parseFloat({{ rate.additional_guest_price }}) * count_additional_guest).toFixed(2) + ' <i class="fa fa-ruble"></i>';
+              old_row.cells[2].textContent = (parseFloat({{ rate.additional_guest_price }}) * count_additional_guest).toFixed(2);
               UpdateTotal();
           }
           else if (object_value > {{ rate.guests_in_price }}) {
@@ -399,7 +399,7 @@
               new_row.id = 'total-guest-price';
               new_row.insertCell(0).appendChild(document.createTextNode('Доплата за дополнительного гостя'));
               new_row.insertCell(1).appendChild(document.createTextNode(count_additional_guest + ' чел.'));
-              new_row.insertCell(2).appendChild(document.createTextNode('{{ rate.additional_guest_price }} <i class="fa fa-ruble"></i>'.replace(',','.')));
+              new_row.insertCell(2).appendChild(document.createTextNode('{{ rate.additional_guest_price }}'.replace(',','.')));
               UpdateTotal();
           }
       }
