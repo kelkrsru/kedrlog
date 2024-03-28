@@ -14,8 +14,17 @@
         <div class="card price-card">
           <img src="{{ price_content.header_image.url }}" class="card-img-top" alt="price">
           <div class="card-body">
-            <h5 class="card-title">{{ price_content.header_house }}</h5>
-            <table class="table">
+            <h5 class="card-title text-truncate">Стоимость аренды парных
+            </h5>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="check-guests" id="four-guests">
+              <label class="form-check-label" for="four-guests">до 4 гостей (семейный тариф)</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="check-guests" id="five-guests" checked>
+              <label class="form-check-label" for="five-guests">от 5 гостей (стандартный тариф)</label>
+            </div>
+            <table class="table" id="t-price">
               <thead>
                 <tr>
                   <th scope="col" class="col-4">Парная</th>
@@ -31,15 +40,15 @@
                     <td>{{ house.floor }}</td>
                     {% for rate in house.rate_house.all %}
                       {% if rate.active %}
-                        <td class="text-color-green">{% if rate.price %}{{ rate.price|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
-                        <td class="text-color-green">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green td-price">{% if rate.price %}{{ rate.price|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
+                        <td class="text-color-green td-price">{% if rate.price_weekend %}{{ rate.price_weekend|floatformat }} <i class="fa fa-ruble"></i>{% else %}Не указано{% endif %}</td>
                       {% endif %}
                     {% endfor %}
                   </tr>
                 {% endfor %}
               </tbody>
             </table>
-            {% if price_content.description_house %}<p class="card-text">{{ price_content.description_house }}</p>{% endif %}
+            {% if price_content.description_house %}<p class="card-text" id="description-houses">{{ price_content.description_house }}</p>{% endif %}
             <h5 class="card-title">{{ price_content.header_service }}</h5>
             <table class="table">
               <thead>
@@ -65,4 +74,36 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+      $('input[type=radio][name=check-guests]').change(function() {
+          let tds = document.querySelectorAll('.td-price');
+          let desc = document.querySelector('#description-houses');
+          let i = 0;
+          if (this.id === 'five-guests') {
+              while(i < tds.length) {
+                  let value = parseFloat(tds[i].innerHTML.split(' ')[0]) + 1000;
+                  tds[i].innerHTML = '' + value + ' ' + '<i class="fa fa-ruble"></i>';
+                  console.log(tds[i].innerHTML);
+                  i++;
+              }
+              if (desc) {
+                  desc.innerHTML = '{{ price_content.description_house }}';
+              }
+          }
+          else if (this.id === 'four-guests') {
+              while(i < tds.length) {
+                  let value = parseFloat(tds[i].innerHTML.split(' ')[0]) - 1000;
+                  tds[i].innerHTML = '' + value + ' ' + '<i class="fa fa-ruble"></i>';
+                  console.log(tds[i].innerHTML);
+                  i++;
+              }
+              if (desc) {
+                  desc.innerHTML = 'Минимальное время аренды бани 2 часа. Максимальная вместимость 4 взрослых гостя. Дополнительные гости, кроме детей до 12 лет не допускаются. В стоимость аренды входит 4 комплекта шапочек/тапочек/полотенец.';
+              }
+          }
+      });
+  </script>
 {% endblock %}

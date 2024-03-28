@@ -99,6 +99,18 @@ class TextContentCorporate(TextContent):
         verbose_name_plural = 'Контент для страницы Корпоративным клиентам'
 
 
+class TextContentCert(TextContent):
+    """Класс текстового контента для страницы Подарочные сертификаты."""
+    def save(self, *args, **kwargs):
+        if self.active:
+            TextContentCert.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Подарочные сертификаты'
+        verbose_name_plural = 'Контент для страницы Подарочные сертификаты'
+
+
 class ContentPrice(Content):
     """Класс контента для страницы Цены."""
     house = models.ManyToManyField(

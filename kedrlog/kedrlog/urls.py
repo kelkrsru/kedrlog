@@ -19,6 +19,7 @@ urlpatterns = [
     path('price/', page_price, name='price'),
     path('spa/', page_spa, name='spa'),
     path('corporate/', page_text_content, name='corporate'),
+    path('cert/', page_text_content, name='cert'),
     path('admin/', admin.site.urls),
 ]
 

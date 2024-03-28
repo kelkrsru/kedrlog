@@ -3,7 +3,7 @@ from staticpages.models import (ContentPrice, ContentSpa, GalleryFood,
                                 GalleryHouses, GalleryTerritory,
                                 TextContentAccessories, TextContentCorporate,
                                 TextContentFz152, TextContentRent,
-                                TextContentRules)
+                                TextContentRules, TextContentCert)
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
 
@@ -114,8 +114,8 @@ class TextContentAccessoriesAdmin(admin.ModelAdmin):
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT
 
 
-@admin.register(TextContentRent)
-class TextContentRentAdmin(admin.ModelAdmin):
+@admin.register(TextContentCert)
+class TextContentCertAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT

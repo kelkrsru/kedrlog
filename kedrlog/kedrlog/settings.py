@@ -159,7 +159,7 @@ ADMIN_REORDER = (
         'staticpages.TextContentRules',
         'staticpages.TextContentFz152',
         'staticpages.TextContentAccessories',
-        'staticpages.TextContentRent',
+        'staticpages.TextContentCert',
         'staticpages.TextContentCorporate',
         'staticpages.ContentPrice',
         'staticpages.ContentSpa',
