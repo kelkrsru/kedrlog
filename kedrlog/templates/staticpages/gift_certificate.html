@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if gift_certificate_content.seo_title %}{{ gift_certificate_content.seo_title }}{% else %}{{ company.name }} - {{ gift_certificate_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ gift_certificate_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ gift_certificate_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=gift_certificate_content.header subtitle_span=gift_certificate_content.second_header %}
+
+{% load user_filters %}
+  <div class="container price-content mb-5">
+    <div class="row flex-row justify-content-center">
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+
+  </script>
+{% endblock %}

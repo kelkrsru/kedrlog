@@ -1,5 +1,5 @@
 from common.models import Content, Gallery, TextContent
-from core.models import AdditionalServices, House, SpaServices
+from core.models import AdditionalServices, House, SpaServices, GiftCertificate
 from django.db import models
 
 
@@ -99,18 +99,6 @@ class TextContentCorporate(TextContent):
         verbose_name_plural = 'Контент для страницы Корпоративным клиентам'
 
 
-class TextContentCert(TextContent):
-    """Класс текстового контента для страницы Подарочные сертификаты."""
-    def save(self, *args, **kwargs):
-        if self.active:
-            TextContentCert.objects.filter(active=True).update(active=False)
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = 'Контент для страницы Подарочные сертификаты'
-        verbose_name_plural = 'Контент для страницы Подарочные сертификаты'
-
-
 class ContentPrice(Content):
     """Класс контента для страницы Цены."""
     house = models.ManyToManyField(
@@ -180,3 +168,22 @@ class ContentSpa(Content):
     class Meta:
         verbose_name = 'Контент для страницы Спа-программы'
         verbose_name_plural = 'Контент для страницы Спа-программы'
+
+
+class ContentGiftCertificate(Content):
+    """Класс контента для страницы Подарочные сертификаты."""
+    gift_certificates = models.ManyToManyField(
+        GiftCertificate,
+        verbose_name='Подарочные сертификаты',
+        help_text='Выберите подарочные сертификаты для отображения на странице Подарочные сертификаты',
+        related_name='contents'
+    )
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            ContentGiftCertificate.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Подарочные сертификаты'
+        verbose_name_plural = 'Контент для страницы Подарочные сертификаты'

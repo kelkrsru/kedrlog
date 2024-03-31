@@ -1,6 +1,6 @@
 from core.models import Company
 from django.shortcuts import get_object_or_404, render
-import staticpages.models as sp_models
+import staticpages.models as static_pages_models
 
 
 def page_gallery(request):
@@ -11,11 +11,11 @@ def page_gallery(request):
 
     company = Company.objects.get(active=True)
     if page == 'houses':
-        gallery = get_object_or_404(sp_models.GalleryHouses, active=True)
+        gallery = get_object_or_404(static_pages_models.GalleryHouses, active=True)
     elif page == 'territory':
-        gallery = get_object_or_404(sp_models.GalleryTerritory, active=True)
+        gallery = get_object_or_404(static_pages_models.GalleryTerritory, active=True)
     elif page == 'food':
-        gallery = get_object_or_404(sp_models.GalleryFood, active=True)
+        gallery = get_object_or_404(static_pages_models.GalleryFood, active=True)
     else:
         gallery = None
 
@@ -34,17 +34,15 @@ def page_text_content(request):
 
     company = Company.objects.get(active=True)
     if page == 'rules':
-        text_content = get_object_or_404(sp_models.TextContentRules, active=True)
+        text_content = get_object_or_404(static_pages_models.TextContentRules, active=True)
     elif page == 'fz152':
-        text_content = get_object_or_404(sp_models.TextContentFz152, active=True)
+        text_content = get_object_or_404(static_pages_models.TextContentFz152, active=True)
     elif page == 'accessories':
-        text_content = get_object_or_404(sp_models.TextContentAccessories, active=True)
+        text_content = get_object_or_404(static_pages_models.TextContentAccessories, active=True)
     elif page == 'rent':
-        text_content = get_object_or_404(sp_models.TextContentRent, active=True)
+        text_content = get_object_or_404(static_pages_models.TextContentRent, active=True)
     elif page == 'corporate':
-        text_content = get_object_or_404(sp_models.TextContentCorporate, active=True)
-    elif page == 'cert':
-        text_content = get_object_or_404(sp_models.TextContentCert, active=True)
+        text_content = get_object_or_404(static_pages_models.TextContentCorporate, active=True)
     else:
         text_content = None
 
@@ -59,7 +57,7 @@ def page_price(request):
     """Метод страницы с ценами."""
     template = 'staticpages/price.html'
 
-    price_content = get_object_or_404(sp_models.ContentPrice, active=True)
+    price_content = get_object_or_404(static_pages_models.ContentPrice, active=True)
     company = Company.objects.get(active=True)
 
     context = {
@@ -73,11 +71,25 @@ def page_spa(request):
     """Метод страницы с ценами."""
     template = 'staticpages/spa.html'
 
-    spa_content = get_object_or_404(sp_models.ContentSpa, active=True)
+    spa_content = get_object_or_404(static_pages_models.ContentSpa, active=True)
     company = Company.objects.get(active=True)
 
     context = {
         'company': company,
         'spa_content': spa_content
+    }
+    return render(request, template, context)
+
+
+def page_gift_certificate(request):
+    """Метод страницы Подарочные сертификаты."""
+    template = 'staticpages/gift_certificate.html'
+
+    gift_certificate_content = get_object_or_404(static_pages_models.ContentGiftCertificate, active=True)
+    company = Company.objects.get(active=True)
+
+    context = {
+        'company': company,
+        'gift_certificate_content': gift_certificate_content
     }
     return render(request, template, context)

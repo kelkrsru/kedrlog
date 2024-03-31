@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (AdditionalFeatures, AdditionalServices, Company, House,
                      PriceForSpaServices, Rate, Reserve, ReserveServices,
                      SettingsBitrix24, SettingsSite, SocialNetworks,
-                     SpaServices, WeekendDays)
+                     SpaServices, WeekendDays, GiftCertificate, GiftCertificateType, OrderGiftCertificate)
 
 admin.site.enable_nav_sidebar = False
 
@@ -123,6 +123,63 @@ class SettingsSiteAdmin(admin.ModelAdmin):
             'Настройки модуля бронирования',
             {
                 "fields": ['reserve_start_time', 'reserve_end_time', 'reserve_closed', 'reserve_closed_all'],
+            },
+        ),
+    ]
+
+
+@admin.register(GiftCertificateType)
+class GiftCertificateTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', ]
+
+
+@admin.register(GiftCertificate)
+class GiftCertificateAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active']
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": ["active", "name", 'description', 'header_image'],
+            },
+        ),
+        (
+            'Настройки подарочного сертификата',
+            {
+                "fields": ['type','min_price', 'max_price', 'step_price', 'validity'],
+            },
+        ),
+        (
+            'Настройки отправки и интеграции',
+            {
+                "fields": ['send_email', 'email', 'send_b24', 'id_catalog_b24'],
+            },
+        ),
+    ]
+
+
+@admin.register(OrderGiftCertificate)
+class OrderGiftCertificateAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'user', 'buy_date_time', 'validity_date_time']
+    ordering = ['-validity_date_time']
+    fieldsets = [
+        (
+            'Параметры сертификата',
+            {
+                'fields': ['type', 'validity_date_time', 'user'],
+            },
+        ),
+        (
+            'Стоимость и оплата',
+            {
+                'fields': ['price','paid', 'buy_date_time'],
+            },
+        ),
+        (
+            'Отправка и интеграция',
+            {
+                'fields': ['sent_email', 'sent_bitrix', 'deal_id_b24'],
             },
         ),
     ]
