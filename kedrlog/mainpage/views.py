@@ -4,7 +4,7 @@ from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
                              ContentBlockMain, ContentBlockService,
                              ContentBlockYandexMap)
 
-COMPANY = None # Company.objects.get(active=True)
+COMPANY = Company.objects.get(active=True)
 
 
 def index(request):

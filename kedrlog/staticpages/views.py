@@ -10,7 +10,7 @@ import staticpages.models as static_pages_models
 from staticpages.forms import OrderGiftCertificateForm
 
 User = get_user_model()
-COMPANY = None # Company.objects.get(active=True)
+COMPANY = Company.objects.get(active=True)
 
 
 def page_gallery(request):

@@ -3,7 +3,8 @@ from core.models import Company, Reserve
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
-COMPANY = None # Company.objects.get(active=True)
+
+COMPANY = Company.objects.get(active=True)
 
 
 @login_required

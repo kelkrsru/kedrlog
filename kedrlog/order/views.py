@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
 User = get_user_model()
-COMPANY = None # Company.objects.get(active=True)
+COMPANY = Company.objects.get(active=True)
 
 
 def index(request):
