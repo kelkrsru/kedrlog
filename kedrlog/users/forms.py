@@ -1,9 +1,9 @@
-import re
-
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
                                        UserChangeForm, UserCreationForm)
+
+from common.views import get_clean_phone
 
 User = get_user_model()
 
@@ -14,7 +14,7 @@ class LoginForm(AuthenticationForm):
 
     def clean_username(self):
         username = self.cleaned_data['username']
-        username = ''.join(re.findall(r'\d+', username))
+        username = get_clean_phone(username)
         if len(username) != 11:
             msg = "Вы указали некорректное имя пользователя."
             self.add_error('username', msg)
@@ -38,7 +38,7 @@ class CreationForm(UserCreationForm):
 
     def clean_phone(self):
         phone_str = self.cleaned_data['phone']
-        phone_num = ''.join(re.findall(r'\d+', phone_str))
+        phone_num = get_clean_phone(phone_str)
         if len(phone_num) != 11:
             msg = "Вы указали некорректный номер телефона."
             self.add_error('phone', msg)
@@ -51,7 +51,7 @@ class CreationForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super(CreationForm, self).save(commit=False)
-        user.username = ''.join(re.findall(r'\d+', user.phone))
+        user.username = get_clean_phone(user.phone)
         if commit:
             user.save()
         return user
@@ -77,7 +77,7 @@ class ChangeForm(UserChangeForm):
 
     def clean_phone(self):
         phone_str = self.cleaned_data['phone']
-        phone_num = ''.join(re.findall(r'\d+', phone_str))
+        phone_num = get_clean_phone(phone_str)
         if len(phone_num) != 11:
             msg = "Вы указали неверный номер телефона."
             self.add_error('phone', msg)
@@ -90,7 +90,7 @@ class ChangeForm(UserChangeForm):
 
     def save(self, commit=True):
         user = super(ChangeForm, self).save(commit=False)
-        user_phone = ''.join(re.findall(r'\d+', user.phone))
+        user_phone = get_clean_phone(user.phone)
         if user.username == user_phone:
             return user
         user.username = user_phone

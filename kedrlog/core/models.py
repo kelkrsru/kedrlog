@@ -2,16 +2,17 @@ from urllib.parse import urlparse
 
 from bitrix24 import Bitrix24
 from ckeditor.fields import RichTextField
-from common.models import CreatedModel, GalleryItem
+from common.models import CreatedModel, GalleryItem, Seo
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+from django_resized import ResizedImageField
 
 User = get_user_model()
 
 
-class Company(CreatedModel):
+class Company(CreatedModel, Seo):
     """Класс для описания основных параметров компании."""
 
     active = models.BooleanField(
@@ -502,6 +503,11 @@ class SpaServices(CreatedModel):
         verbose_name='Активность',
         default=True
     )
+    sort = models.PositiveSmallIntegerField(
+        verbose_name='Сортировка',
+        help_text='Чем меньше значение, тем выше будет запись',
+        default=10
+    )
     name = models.CharField(
         verbose_name='Наименование',
         max_length=255
@@ -540,6 +546,231 @@ class SpaServices(CreatedModel):
     class Meta:
         verbose_name = 'Программа парения'
         verbose_name_plural = 'Программы парения'
+
+
+class GiftCertificateType(CreatedModel):
+    """Класс Типы подарочных сертификатов."""
+    name = models.CharField(
+        verbose_name='Наименование',
+        max_length=255
+    )
+    value = models.CharField(
+        verbose_name='Значение',
+        max_length=255
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Тип подарочного сертификата'
+        verbose_name_plural = 'Типы подарочных сертификатов'
+
+
+class GiftCertificate(CreatedModel):
+    """Класс Подарочный сертификат."""
+    class ColorText(models.TextChoices):
+        WHITE = 'white', 'Белый'
+        DARK = 'dark', 'Черный'
+        SHADOW = 'shadow', 'Белый с черной обводкой'
+        __empty__ = 'Не выбрано'
+
+    active = models.BooleanField(
+        verbose_name='Активность',
+        default=True
+    )
+    name = models.CharField(
+        verbose_name='Наименование',
+        max_length=255
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True
+    )
+    type = models.ManyToManyField(
+        GiftCertificateType,
+        verbose_name='Тип',
+        help_text='Тип подарочного сертификата',
+        related_name='gift_certificates'
+    )
+    min_price = models.DecimalField(
+        verbose_name='Минимальный номинал',
+        help_text='Минимальный номинал сертификата',
+        max_digits=10,
+        decimal_places=2,
+        default=1000
+    )
+    max_price = models.DecimalField(
+        verbose_name='Максимальный номинал',
+        help_text='Максимальный номинал сертификата',
+        max_digits=10,
+        decimal_places=2,
+        default=1000000
+    )
+    step_price = models.DecimalField(
+        verbose_name='Шаг',
+        help_text='Шаг для изменения номинала сертификата',
+        max_digits=10,
+        decimal_places=2,
+        default=1000
+    )
+    validity = models.PositiveSmallIntegerField(
+        'Срок действия',
+        help_text='Срок действия сертификата в днях. По умолчанию 0 - неограничен',
+        default=0
+    )
+    send_email = models.BooleanField(
+        'Отправлять на email',
+        help_text='Отправлять информацию по заказанным сертификатам на email. Обязательно укажите его в настройках',
+        default=True
+    )
+    email = models.EmailField(
+        'Email адрес',
+        help_text='Email адрес для отправки информации по заказанным сертификатам',
+        blank=True
+    )
+    send_b24 = models.BooleanField(
+        'Отправлять в Битрикс24',
+        help_text='Создавать в Битрикс24 сделки по заказанным сертификатам',
+        default=False
+    )
+    id_catalog_b24 = models.PositiveIntegerField(
+        verbose_name='ID товара',
+        help_text='ID товара в каталоге Битрикс24',
+        null=True,
+        blank=True
+    )
+    background_image_card = ResizedImageField(
+        verbose_name='Файл фонового изображения карточки',
+        help_text='Изображение отображается в фоне карточки Подарочного сертификата',
+        blank=True,
+        upload_to='img/giftcert/',
+        size=[600, 400]
+    )
+    background_image_form = ResizedImageField(
+        verbose_name='Файл фонового изображения формы',
+        help_text='Изображение отображается в фоне формы Подарочного сертификата',
+        blank=True,
+        upload_to='img/giftcert/',
+        size=[800, 800]
+    )
+    text_color = models.CharField(
+        'Цвет текста в карточке',
+        max_length=10,
+        choices=ColorText.choices,
+        default=ColorText.DARK
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Подарочный сертификат'
+        verbose_name_plural = 'Подарочные сертификаты'
+
+
+class OrderGiftCertificate(CreatedModel):
+    """Класс для Заказа подарочного сертификата."""
+    gift_certificate = models.ForeignKey(
+        GiftCertificate,
+        verbose_name='Подарочный сертификат',
+        help_text='Из какого подарочного сертификата был создан заказ. Служебное поле для определения начальных '
+                  'параметров',
+        on_delete=models.PROTECT,
+        related_name='orders',
+    )
+    buy_date_time = models.DateTimeField(
+        'Дата и время оплаты',
+        help_text='Дата и время оплаты сертификата',
+        blank=True,
+        null=True,
+    )
+    validity_date_time = models.DateField(
+        'Действителен до',
+        help_text='Дата и время, до которых сертификат действителен. Если не заполнено, то срок неограничен',
+        null=True,
+        blank=True
+    )
+    type = models.ForeignKey(
+        GiftCertificateType,
+        verbose_name='Тип сертификата',
+        help_text='Тип выбранного сертификата',
+        on_delete=models.PROTECT,
+        related_name='orders'
+    )
+    price = models.DecimalField(
+        'Стоимость',
+        help_text='Стоимость сертификата',
+        max_digits=10,
+        decimal_places=2
+    )
+    paid = models.BooleanField(
+        'Оплачено',
+        help_text='Сумма сертификата оплачена клиентом',
+        default=False,
+    )
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь',
+        on_delete=models.PROTECT,
+    )
+    user_name = models.CharField(
+        'Имя клиента',
+        help_text='Имя клиента',
+        max_length=255,
+        blank=True
+    )
+    user_lastname = models.CharField(
+        'Фамилия клиента',
+        help_text='Фамилия клиента',
+        max_length=255,
+        blank=True
+    )
+    user_email = models.EmailField(
+        'Email клиента',
+        help_text='Электронная почта клиента',
+        blank=True
+    )
+    user_address = models.CharField(
+        'Адрес клиента',
+        help_text='Адрес доставки сертификата клиенту',
+        max_length=255,
+        blank=True
+    )
+    user_phone = models.CharField(
+        'Телефон клиента',
+        help_text='Телефон клиента',
+        max_length=20,
+        blank=True
+    )
+    sent_email = models.BooleanField(
+        'Отправлено на email',
+        help_text='Сертификат и детали заказа отправлены на email клиента',
+        default=False
+    )
+    sent_bitrix = models.BooleanField(
+        verbose_name='Отправлено в Битрикс24',
+        help_text='Отправлено в Битрикс24, создана сделка',
+        default=False,
+    )
+    deal_id_b24 = models.PositiveIntegerField(
+        verbose_name='ID сделки в Битрикс24',
+        help_text='ID сделки в Битрикс24',
+        unique=True,
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return f'Сертификат №{self.pk} до {str(self.validity_date_time) if self.validity_date_time else "Неограничен"}'
+
+    class Meta:
+        verbose_name = 'Заказ на подарочный сертификат'
+        verbose_name_plural = 'Заказы на подарочные сертификаты'
 
 
 class PriceForSpaServices(CreatedModel):
@@ -665,6 +896,12 @@ class SettingsBitrix24(CreatedModel):
     stage_id_for_deal_adding = models.CharField(
         verbose_name='ID стадии для создания сделки',
         help_text='ID стадии воронки сделок для создания сделки бронирования с сайта в CRM',
+        max_length=10,
+        default=6,
+    )
+    stage_id_for_gift_cert = models.CharField(
+        verbose_name='ID стадии для создания сделки по подарочному сертификату',
+        help_text='ID стадии воронки сделок для создания сделки по подарочному сертификату с сайта в CRM',
         max_length=10,
         default=6,
     )

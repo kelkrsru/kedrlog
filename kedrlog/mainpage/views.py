@@ -4,12 +4,13 @@ from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
                              ContentBlockMain, ContentBlockService,
                              ContentBlockYandexMap)
 
+COMPANY = None # Company.objects.get(active=True)
+
 
 def index(request):
     """Метод главной страницы."""
     template = 'mainpage/index.html'
 
-    company = Company.objects.get(active=True)
     content_block_main = ContentBlockMain.objects.get(active=True)
     content_block_infra = ContentBlockInfrastructure.objects.get(active=True)
     content_block_service = ContentBlockService.objects.get(active=True)
@@ -24,7 +25,7 @@ def index(request):
             min_time[house.house.pk] = house.house.rate_house.get(active=True).min_time
 
     context = {
-        'company': company,
+        'company': COMPANY,
         'content_block_main': content_block_main,
         'content_block_infra': content_block_infra,
         'content_block_service': content_block_service,

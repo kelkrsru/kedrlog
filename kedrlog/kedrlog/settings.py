@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'personal',
     'order',
+    'bootstrap_modal_forms',
+    # 'widget_tweaks',
     # 'admin_reorder',
 ]
 
@@ -159,7 +161,8 @@ ADMIN_REORDER = (
         'staticpages.TextContentRules',
         'staticpages.TextContentFz152',
         'staticpages.TextContentAccessories',
-        'staticpages.TextContentCert',
+        'staticpages.ContentGiftCertificate',
+        'staticpages.TextContentRulesGiftCert',
         'staticpages.TextContentCorporate',
         'staticpages.ContentPrice',
         'staticpages.ContentSpa',
@@ -172,12 +175,15 @@ ADMIN_REORDER = (
         'core.AdditionalServices',
         'core.SpaServices',
         'core.PriceForSpaServices',
+        'core.GiftCertificate',
+        'core.GiftCertificateType',
         'core.WeekendDays',
         'core.SettingsSite',
         'core.SettingsBitrix24',
     ]},
     {'label': 'Бронирование', 'app': 'core', 'models': [
         'core.Reserve',
+        'core.OrderGiftCertificate',
     ]},
     {'label': 'Пользователи', 'app': 'users', 'models': [
         'users.User',

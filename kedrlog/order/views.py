@@ -3,16 +3,16 @@ import json
 
 from bitrix24 import Bitrix24
 from bitrix24.exceptions import BitrixError
-from common.views import get_clean_phone
+from common.views import user_get_or_create_in_site, contact_get_or_create_in_b24
 from core.models import (AdditionalServices, Company, House, Rate, Reserve, ReserveServices, SettingsBitrix24,
                          SettingsSite)
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 User = get_user_model()
+COMPANY = None # Company.objects.get(active=True)
 
 
 def index(request):
@@ -24,12 +24,11 @@ def index(request):
     if not all([True if param in request.POST else False for param in ['house', 'date', 'duration']]):
         return render(request, 'error.html', {'error_name': 'Ошибка'})
 
-    company = Company.objects.get(active=True)
     settings_site = get_object_or_404(SettingsSite, active=True)
     if settings_site.reserve_closed_all and not request.user.is_superuser:
-        return render(request, 'order/reserve_closed.html', {'company': company})
+        return render(request, 'order/reserve_closed.html', {'company': COMPANY})
     if settings_site.reserve_closed and not request.user.is_superuser and not request.user.is_staff:
-        return render(request, 'order/reserve_closed.html', {'company': company})
+        return render(request, 'order/reserve_closed.html', {'company': COMPANY})
 
     house = get_object_or_404(House, pk=request.POST.get('house'))
     date = timezone.datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
@@ -46,7 +45,7 @@ def index(request):
                         + timezone.timedelta(hours=i)} for i in range(24)]
 
     context = {
-        'company': company,
+        'company': COMPANY,
         'house': house,
         'start_date': date,
         'duration': duration,
@@ -121,48 +120,6 @@ def update_total_section_service(request):
 def new(request):
     """Метод для создания нового заказа."""
 
-    def contact_get_or_create_in_b24(b24, user, responsible):
-        """Метод получения контакта в Б24, а в случаи отсутствия контакта, он его создает в Б24."""
-
-        user_phone_clear = get_clean_phone(user.phone)
-        contacts = b24.callMethod('crm.duplicate.findbycomm', entity_type="CONTACT", type="PHONE",
-                                  values=[user_phone_clear])
-        if not contacts:
-            fields = {
-                'NAME': user.first_name,
-                'LAST_NAME': user.last_name,
-                'OPENED': 'Y',
-                'ASSIGNED_BY_ID': responsible,
-                'TYPE_ID': 'CLIENT',
-                'PHONE': [{'VALUE': user_phone_clear, 'VALUE_TYPE': 'WORK'}],
-                'EMAIL': [{'VALUE': user.email, 'VALUE_TYPE': 'WORK'}],
-            }
-            contact_id = b24.callMethod('crm.contact.add', fields=fields)
-        else:
-            contact_id = contacts.get('CONTACT')[0]
-        user.id_b24 = contact_id
-        user.save()
-        return b24.callMethod('crm.contact.get', id=user.id_b24)
-
-    def user_get_or_create_in_site(user_phone, user_email, user_first_name, user_last_name):
-        """Метод, который проверяет пользователя на сайте и создает в случаи отсутствия"""
-
-        user_phone_clear = get_clean_phone(user_phone)
-        user, created = User.objects.get_or_create(
-            phone=user_phone, defaults={'username': user_phone_clear, 'email': user_email,
-                                        'first_name': user_first_name, 'last_name': user_last_name})
-        if created:
-            password = User.objects.make_random_password()
-            user.set_password(password)
-            user.save()
-            subject = 'Activate your account'
-            message = render_to_string('order/user_create_email.html', {
-                'user': user,
-                'password': password
-            })
-            user.email_user(subject, message)
-        return user
-
     def deal_create_in_b24(contact_id, settings, order, b24):
         """Метод, который создает сделку в Битрикс24."""
         # Создаем сделку в Б24
@@ -209,7 +166,6 @@ def new(request):
             data.append({
                 rate.is_day_of(start_date): order.duration
             })
-        print(data)
         for elem in data:
             fields = {
                 'ownerId': deal_id,
@@ -274,20 +230,18 @@ def new(request):
         user_last_name = request.POST.get('user_last_name')
         user_email = request.POST.get('user_email')
         user_phone = request.POST.get('user_phone')
-        username = request.POST.get('username')
+        user = request.user
         total_price = decimal.Decimal(request.POST.get('total_price'))
         house = get_object_or_404(House, pk=int(request.POST.get('house_pk')))
         additional_services = json.loads(request.POST.get('additional_services'))
         settings = SettingsBitrix24.objects.get(active=True)
 
         # Проверяем пользователя на сайте
-        if username:
-            user = User.objects.get(username=username)
-        else:
+        if not user.is_authenticated:
             user = user_get_or_create_in_site(user_phone, user_email, user_first_name, user_last_name)
 
         # Проверяем пользователя в Битрикс24
-        webhook = SettingsBitrix24.objects.get(active=True).webhook
+        webhook = settings.webhook
         b24 = Bitrix24(webhook)
         if user.id_b24:
             try:

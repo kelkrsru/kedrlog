@@ -1,9 +1,5 @@
 from django.contrib import admin
-from staticpages.models import (ContentPrice, ContentSpa, GalleryFood,
-                                GalleryHouses, GalleryTerritory,
-                                TextContentAccessories, TextContentCorporate,
-                                TextContentFz152, TextContentRent,
-                                TextContentRules, TextContentCert)
+import staticpages.models as static_pages_models
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
 
@@ -71,72 +67,98 @@ FIELDSETS_FOR_SPA = [
     ),
 ]
 
+FIELDSETS_FOR_GIFT_CERTIFICATE = [
+    (
+        None,
+        {
+            "fields": ["active", "name", "header", "second_header", "gift_certificates"],
+        },
+    ),
+    (
+        'Контент',
+        {
+            "fields": ["content_image", "content_text", ],
+        },
+    ),
+    (
+        "Настройки для SEO",
+        FIELDS_SEO
+    ),
+]
 
-@admin.register(GalleryHouses)
+
+@admin.register(static_pages_models.GalleryHouses)
 class GalleryHousesAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_GALLERY
 
 
-@admin.register(GalleryTerritory)
+@admin.register(static_pages_models.GalleryTerritory)
 class GalleryTerritoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_GALLERY
 
 
-@admin.register(GalleryFood)
+@admin.register(static_pages_models.GalleryFood)
 class GalleryFoodAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_GALLERY
 
 
-@admin.register(TextContentRules)
+@admin.register(static_pages_models.TextContentRules)
 class TextContentRulesAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT
 
 
-@admin.register(TextContentFz152)
+@admin.register(static_pages_models.TextContentRulesGiftCert)
+class TextContentRulesGiftCertAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active', ]
+    fieldsets = FIELDSETS_FOR_TEXT_CONTENT
+
+
+@admin.register(static_pages_models.TextContentFz152)
 class TextContentFz152Admin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT
 
 
-@admin.register(TextContentAccessories)
+@admin.register(static_pages_models.TextContentAccessories)
 class TextContentAccessoriesAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT
 
 
-@admin.register(TextContentCert)
-class TextContentCertAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active']
-    ordering = ['-active', ]
-    fieldsets = FIELDSETS_FOR_TEXT_CONTENT
-
-
-@admin.register(TextContentCorporate)
+@admin.register(static_pages_models.TextContentCorporate)
 class TextContentCorporateAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT
 
 
-@admin.register(ContentPrice)
+@admin.register(static_pages_models.ContentPrice)
 class ContentPriceAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_PRICE
 
 
-@admin.register(ContentSpa)
+@admin.register(static_pages_models.ContentSpa)
 class ContentSpaAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_SPA
+
+
+@admin.register(static_pages_models.ContentGiftCertificate)
+class ContentSpaAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active', ]
+    fieldsets = FIELDSETS_FOR_GIFT_CERTIFICATE

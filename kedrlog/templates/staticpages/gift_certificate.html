@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if gift_certificate_content.seo_title %}{{ gift_certificate_content.seo_title }}{% else %}{{ company.name }} - {{ gift_certificate_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ gift_certificate_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ gift_certificate_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=gift_certificate_content.header subtitle_span=gift_certificate_content.second_header %}
+
+{% load user_filters %}
+  <div class="container price-content mb-5">
+    <div class="row flex-row justify-content-center">
+      {% if one_cert %}
+        <div class="col-8">
+          {% include 'staticpages/gift_certificate_form.html' with one_cert=one_cert %}
+        </div>
+      {% else %}
+        {% for cert in gift_certificate_content.gift_certificates.all %}
+          <div class="col-12 col-lg-8 col-xl-4 mt-3">
+            <div class="card gift-certificate-card {% if cert.text_color == 'white' %}text-white{% elif cert.text_color == 'dark' %}text-dark
+                                                    {% elif cert.text_color == 'shadow' %}text-white text-shadow{% endif %}"
+                  data-form-url="{% url 'create-cert' cert.pk %}" id="gift-certificate-{{ cert.pk }}">
+              {% if cert.background_image_card %}<img src="{{ cert.background_image_card.url }}" alt="">{% endif %}
+
+              <div class="card-body">
+                <p>{{ cert.name }}</p>
+                <p>{{ cert.description }}</p>
+                <div class="row">
+                  <div class="col-6">
+                    <p>Срок действия<br>{% if cert.validity %}{{ cert.validity }} дней{% else %}Неограничен{% endif %}</p>
+                  </div>
+                  <div class="col-6 text-end">
+                    <p>Минимальная сумма<br>{{ cert.min_price|floatformat }} <i class="fa fa-ruble"></i></p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12 text-end">
+                    {% for type in cert.type.all %}
+                      <span class="me-2">{{ type.name }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+    </div>
+    <div class="row flex-row gift-certificate-content justify-content-center">
+      <div class="col-12 col-lg-8 text-center">
+        <img src="{{ gift_certificate_content.content_image.url }}" alt="">
+      </div>
+      <div class="col-8 mt-5">
+        <p>{{ gift_certificate_content.content_text|safe }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade " tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content border-radius-30"></div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="text/javascript">
+    function ChangeTypeEvent() {
+        document.querySelector('#id_type').addEventListener('change', function() {
+            let address_field = document.querySelector('#id_user_address');
+            let label_for_address_field = document.querySelector('label[for="id_user_address"]');
+            if (this.value === '1') {
+                label_for_address_field.style.display = 'block';
+                address_field.type = 'text';
+                address_field.classList.add('form-control');
+                address_field.value = '';
+            } else {
+                label_for_address_field.style.display = 'none';
+                address_field.type = 'hidden';
+                address_field.value = 'address';
+            }
+        });
+    }
+
+    function CheckRules() {
+        {#Функция для проверки согласий с правилами и активации кнопки Оформить сертификат#}
+        let check_box_fz152 = document.querySelector('#check-box-fz152');
+        let check_box_rules_gift_cert = document.querySelector('#check-box-rules-gift-cert');
+        let btn_gift_cert = document.querySelector('#btn-gift-cert');
+
+        btn_gift_cert.disabled = !(check_box_fz152.checked && check_box_rules_gift_cert.checked);
+    }
+
+    $('#modal').on('shown.bs.modal', function() {
+        ChangeTypeEvent();
+        const eventCalllback = function (e) {
+            let el = e.target,
+                clearVal = el.dataset.phoneClear,
+                pattern = el.dataset.phonePattern,
+                matrix_def = "+7(___) ___-__-__",
+                matrix = pattern ? pattern : matrix_def,
+                i = 0,
+                def = matrix.replace(/\D/g, ""),
+                val = e.target.value.replace(/\D/g, "");
+            if (clearVal !== 'false' && e.type === 'blur') {
+                if (val.length < matrix.match(/([\d])/g).length) {
+                    e.target.value = '';
+                    return;
+                }
+            }
+            if (def.length >= val.length) val = def;
+            e.target.value = matrix.replace(/./g, function (a) {
+                return /[_\d]/.test(a) && i < val.length ? val.charAt(i++) : i >= val.length ? "" : a
+            });
+        };
+        const phone_inputs = document.querySelectorAll('[data-phone-pattern]');
+        for (let elem of phone_inputs) {
+            for (let ev of ['input', 'blur', 'focus']) {
+                elem.addEventListener(ev, eventCalllback);
+            }
+        }
+    });
+    document.addEventListener('DOMContentLoaded', (e) => {
+      let cards = document.getElementsByClassName('gift-certificate-card');
+      for (let index=0; index < cards.length; index++) {
+        modalForm(cards[index], {
+          formURL: cards[index]["dataset"]["formUrl"]
+        });
+      }
+    });
+    ChangeTypeEvent();
+    CheckRules();
+  </script>
+{% endblock %}
