@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'personal',
     'order',
+    'bootstrap_modal_forms',
+    # 'widget_tweaks',
     # 'admin_reorder',
 ]
 
@@ -160,6 +162,7 @@ ADMIN_REORDER = (
         'staticpages.TextContentFz152',
         'staticpages.TextContentAccessories',
         'staticpages.ContentGiftCertificate',
+        'staticpages.TextContentRulesGiftCert',
         'staticpages.TextContentCorporate',
         'staticpages.ContentPrice',
         'staticpages.ContentSpa',

@@ -1,0 +1,21 @@
+{% autoescape off %}
+На сайте https://kedrlog.ru сделан заказ на подарочный сертификат.
+
+Данные клиента:
+  Имя - {{ user.first_name }}
+  Фамилия - {{ user.last_name }}
+  Email - {{ user.email }}
+  Телефон - {{ user.phone }}
+
+Параметры сертификата:
+  Сертификат - {{ certificate.gift_certificate.name }}
+  Сумма - {{ certificate.price }}
+  Срок действия - {% if certificate.validity %}{{ certificate.validity }}{% else %}Неограничен{% endif %}
+  Тип доставки - {{ certificate.type }}
+  {% if certificate.user_address != 'address' %}Адрес доставки - {{ certificate.user_address }}{% endif %}
+
+Ссылка на данные по заказу: https://kedrlog.ru/admin/core/ordergiftcertificate/{{ certificate.pk }}
+
+Необходимо связаться с клиентом и принять от него оплату по сертификату.
+
+{% endautoescape %}

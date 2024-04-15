@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ company.name }} - Главная{% endblock %}
+{% block title %}
+  {% if company.seo_title %}{{ company.seo_title }}{% else %}{{ company.name }} - Тест{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ company.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ company.seo_keywords }}"{% endblock %}
 {% block content %}
   {% load user_filters %}
   {% load static %}

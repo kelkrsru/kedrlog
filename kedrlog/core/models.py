@@ -2,16 +2,17 @@ from urllib.parse import urlparse
 
 from bitrix24 import Bitrix24
 from ckeditor.fields import RichTextField
-from common.models import CreatedModel, GalleryItem
+from common.models import CreatedModel, GalleryItem, Seo
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+from django_resized import ResizedImageField
 
 User = get_user_model()
 
 
-class Company(CreatedModel):
+class Company(CreatedModel, Seo):
     """Класс для описания основных параметров компании."""
 
     active = models.BooleanField(
@@ -502,6 +503,11 @@ class SpaServices(CreatedModel):
         verbose_name='Активность',
         default=True
     )
+    sort = models.PositiveSmallIntegerField(
+        verbose_name='Сортировка',
+        help_text='Чем меньше значение, тем выше будет запись',
+        default=10
+    )
     name = models.CharField(
         verbose_name='Наименование',
         max_length=255
@@ -567,6 +573,11 @@ class GiftCertificateType(CreatedModel):
 
 class GiftCertificate(CreatedModel):
     """Класс Подарочный сертификат."""
+    class ColorText(models.TextChoices):
+        WHITE = 'white', 'Белый'
+        DARK = 'dark', 'Черный'
+        SHADOW = 'shadow', 'Белый с черной обводкой'
+        __empty__ = 'Не выбрано'
 
     active = models.BooleanField(
         verbose_name='Активность',
@@ -612,12 +623,6 @@ class GiftCertificate(CreatedModel):
         help_text='Срок действия сертификата в днях. По умолчанию 0 - неограничен',
         default=0
     )
-    header_image = models.ImageField(
-        verbose_name='Файл основного изображения',
-        help_text='Изображение отображается в шапке карточки на странице Подарочные сертификаты',
-        blank=True,
-        upload_to='img/giftcert/'
-    )
     send_email = models.BooleanField(
         'Отправлять на email',
         help_text='Отправлять информацию по заказанным сертификатам на email. Обязательно укажите его в настройках',
@@ -639,6 +644,26 @@ class GiftCertificate(CreatedModel):
         null=True,
         blank=True
     )
+    background_image_card = ResizedImageField(
+        verbose_name='Файл фонового изображения карточки',
+        help_text='Изображение отображается в фоне карточки Подарочного сертификата',
+        blank=True,
+        upload_to='img/giftcert/',
+        size=[600, 400]
+    )
+    background_image_form = ResizedImageField(
+        verbose_name='Файл фонового изображения формы',
+        help_text='Изображение отображается в фоне формы Подарочного сертификата',
+        blank=True,
+        upload_to='img/giftcert/',
+        size=[800, 800]
+    )
+    text_color = models.CharField(
+        'Цвет текста в карточке',
+        max_length=10,
+        choices=ColorText.choices,
+        default=ColorText.DARK
+    )
 
     def __str__(self):
         return self.name
@@ -650,10 +675,19 @@ class GiftCertificate(CreatedModel):
 
 class OrderGiftCertificate(CreatedModel):
     """Класс для Заказа подарочного сертификата."""
+    gift_certificate = models.ForeignKey(
+        GiftCertificate,
+        verbose_name='Подарочный сертификат',
+        help_text='Из какого подарочного сертификата был создан заказ. Служебное поле для определения начальных '
+                  'параметров',
+        on_delete=models.PROTECT,
+        related_name='orders',
+    )
     buy_date_time = models.DateTimeField(
         'Дата и время оплаты',
         help_text='Дата и время оплаты сертификата',
-        default=timezone.now,
+        blank=True,
+        null=True,
     )
     validity_date_time = models.DateField(
         'Действителен до',
@@ -683,6 +717,35 @@ class OrderGiftCertificate(CreatedModel):
         User,
         verbose_name='Пользователь',
         on_delete=models.PROTECT,
+    )
+    user_name = models.CharField(
+        'Имя клиента',
+        help_text='Имя клиента',
+        max_length=255,
+        blank=True
+    )
+    user_lastname = models.CharField(
+        'Фамилия клиента',
+        help_text='Фамилия клиента',
+        max_length=255,
+        blank=True
+    )
+    user_email = models.EmailField(
+        'Email клиента',
+        help_text='Электронная почта клиента',
+        blank=True
+    )
+    user_address = models.CharField(
+        'Адрес клиента',
+        help_text='Адрес доставки сертификата клиенту',
+        max_length=255,
+        blank=True
+    )
+    user_phone = models.CharField(
+        'Телефон клиента',
+        help_text='Телефон клиента',
+        max_length=20,
+        blank=True
     )
     sent_email = models.BooleanField(
         'Отправлено на email',

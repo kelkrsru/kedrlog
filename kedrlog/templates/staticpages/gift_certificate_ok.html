@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} {% endblock %}
+{% block seo_description %}{% endblock %}
+{% block seo_keywords %}{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2="Подарочный сертификат" subtitle_span="Поздравляем!" %}
+  <div class="container price-content mb-5">
+    <div class="row flex-row justify-content-center">
+      <p >Вы успешно оформили заказ на подарочный сертификат.</p>
+      <p>Параметры вашего заказа:</p>
+      <div class="row ms-5 fs-5">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Номер заказа:</th>
+            <td>{{ object.pk }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Название сертификата:</th>
+            <td>{{ object.gift_certificate.name }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Срок действия:</th>
+            <td>{% if object.validity %}{{ object.validity }}{% else %}Неограничен{% endif %}</td>
+          </tr>
+          <tr>
+            <th scope="row">Сумма сертификата:</th>
+            <td>{{ object.price|floatformat }} <i class="fa fa-ruble"></i></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="text/javascript">
+
+  </script>
+{% endblock %}

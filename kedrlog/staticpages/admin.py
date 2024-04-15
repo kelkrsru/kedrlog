@@ -75,6 +75,12 @@ FIELDSETS_FOR_GIFT_CERTIFICATE = [
         },
     ),
     (
+        'Контент',
+        {
+            "fields": ["content_image", "content_text", ],
+        },
+    ),
+    (
         "Настройки для SEO",
         FIELDS_SEO
     ),
@@ -104,6 +110,13 @@ class GalleryFoodAdmin(admin.ModelAdmin):
 
 @admin.register(static_pages_models.TextContentRules)
 class TextContentRulesAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active', ]
+    fieldsets = FIELDSETS_FOR_TEXT_CONTENT
+
+
+@admin.register(static_pages_models.TextContentRulesGiftCert)
+class TextContentRulesGiftCertAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_TEXT_CONTENT

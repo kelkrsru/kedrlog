@@ -1,3 +1,6 @@
+from ckeditor.fields import RichTextField
+from django_resized import ResizedImageField
+
 from common.models import Content, Gallery, TextContent
 from core.models import AdditionalServices, House, SpaServices, GiftCertificate
 from django.db import models
@@ -49,6 +52,18 @@ class TextContentRules(TextContent):
     class Meta:
         verbose_name = 'Контент для страницы Правила посещения'
         verbose_name_plural = 'Контент для страницы Правила посещения'
+
+
+class TextContentRulesGiftCert(TextContent):
+    """Класс текстового контента для страницы Правила использования подарочного сертификата."""
+    def save(self, *args, **kwargs):
+        if self.active:
+            TextContentRulesGiftCert.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Контент для страницы Правила использования подарочного сертификата'
+        verbose_name_plural = 'Контент для страницы Правила использования подарочного сертификата'
 
 
 class TextContentFz152(TextContent):
@@ -177,6 +192,18 @@ class ContentGiftCertificate(Content):
         verbose_name='Подарочные сертификаты',
         help_text='Выберите подарочные сертификаты для отображения на странице Подарочные сертификаты',
         related_name='contents'
+    )
+    content_image = ResizedImageField(
+        verbose_name='Файл изображения',
+        help_text='Изображение сразу после сертификатов',
+        blank=True,
+        upload_to='img/giftcert/',
+        size=[800, 800]
+    )
+    content_text = RichTextField(
+        verbose_name='Текст страницы',
+        help_text='Текст после изображения',
+        blank=True
     )
 
     def save(self, *args, **kwargs):

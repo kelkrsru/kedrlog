@@ -24,6 +24,12 @@ class CompanyAdmin(admin.ModelAdmin):
                 'fields': ['social_networks', ],
             }
         ),
+        (
+            'Seo для главной страницы',
+            {
+                'fields': ['seo_title', 'seo_description', 'seo_keywords'],
+            }
+        ),
     ]
 
 
@@ -47,8 +53,9 @@ class AdditionalServicesAdmin(admin.ModelAdmin):
 
 @admin.register(SpaServices)
 class SpaServicesAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active']
-    ordering = ['-active']
+    list_display = ['name', 'active', 'sort']
+    ordering = ['-active', 'sort']
+    list_editable = ['sort', ]
 
 
 @admin.register(PriceForSpaServices)
@@ -141,13 +148,19 @@ class GiftCertificateAdmin(admin.ModelAdmin):
         (
             None,
             {
-                "fields": ["active", "name", 'description', 'header_image'],
+                "fields": ["active", "name", 'description'],
             },
         ),
         (
             'Настройки подарочного сертификата',
             {
                 "fields": ['type','min_price', 'max_price', 'step_price', 'validity'],
+            },
+        ),
+        (
+            'Настройки внешнего вида',
+            {
+                "fields": ['background_image_card', 'text_color', 'background_image_form'],
             },
         ),
         (
@@ -167,13 +180,19 @@ class OrderGiftCertificateAdmin(admin.ModelAdmin):
         (
             'Параметры сертификата',
             {
-                'fields': ['type', 'validity_date_time', 'user'],
+                'fields': ['type', 'validity_date_time', 'user', 'gift_certificate'],
             },
         ),
         (
             'Стоимость и оплата',
             {
                 'fields': ['price','paid', 'buy_date_time'],
+            },
+        ),
+        (
+            'Данные пользователя',
+            {
+                'fields': ['user_name', 'user_lastname', 'user_phone', 'user_email', 'user_address'],
             },
         ),
         (
