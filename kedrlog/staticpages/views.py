@@ -141,8 +141,10 @@ class OrderGiftCertificateCreateView(BSModalCreateView):
         data['certificate'] = GiftCertificate.objects.get(pk=self.gift_cert_id)
         return data
 
+    # Здесь костыль
     def get_success_url(self):
-        return reverse_lazy('ok-cert', kwargs={'pk': self.object.pk})
+        cert = OrderGiftCertificate.objects.last()
+        return reverse_lazy('ok-cert', kwargs={'pk': cert.pk})
 
 
 class OrderGiftCertificateDetailView(DetailView):
