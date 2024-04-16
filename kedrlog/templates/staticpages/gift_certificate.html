@@ -50,7 +50,7 @@
     </div>
     <div class="row flex-row gift-certificate-content justify-content-center">
       <div class="col-12 col-lg-8 text-center">
-        <img src="{{ gift_certificate_content.content_image.url }}" alt="">
+        <img src="{% if gift_certificate_content.content_image %}{{ gift_certificate_content.content_image.url }}{% endif %}" alt="">
       </div>
       <div class="col-8 mt-5">
         <p>{{ gift_certificate_content.content_text|safe }}</p>
