@@ -63,7 +63,7 @@ class OrderGiftCertificateForm(BSModalModelForm):
             self.initial['user_lastname'] = self.user.last_name
             self.initial['user_email'] = self.user.email
             self.initial['user_phone'] = self.user.phone
-            self.fields['user_phone'].widget.attrs['disabled'] = True
+            self.fields['user_phone'].widget.attrs['readonly'] = True
             self.fields['user_phone'].help_text = f'Для изменения номера телефона необходимо отредактировать свойства вашего пользователя в <a href="{reverse_lazy("personal:index")}">личном кабинете</a>'
             self.initial['user_name'] = self.user.first_name
 
