@@ -100,6 +100,9 @@ def page_gift_certificate(request):
         'gift_certificate_content': gift_certificate_content,
         'one_cert': False
     }
+    # Заглушка для простых пользователей
+    if not request.user.is_superuser and not request.user.is_staff:
+        return render(request, 'staticpages/gift_certificate_closed.html', context)
 
     if gift_certificate_content.gift_certificates.count() == 1:
         gift_cert = gift_certificate_content.gift_certificates.first()
