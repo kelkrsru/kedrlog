@@ -10,7 +10,7 @@
 Параметры сертификата:
   Сертификат - {{ certificate.gift_certificate.name }}
   Сумма - {{ certificate.price }}
-  Срок действия - {% if certificate.validity %}{{ certificate.validity }}{% else %}Неограничен{% endif %}
+  Срок действия - {% if certificate.validity_date_time %}{{ certificate.validity_date_time }}{% else %}Неограничен{% endif %}
   Тип доставки - {{ certificate.type }}
   {% if certificate.user_address != 'address' %}Адрес доставки - {{ certificate.user_address }}{% endif %}
 
