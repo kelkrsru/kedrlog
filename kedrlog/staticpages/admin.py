@@ -39,7 +39,7 @@ FIELDSETS_FOR_PRICE = [
     (
         'Основные услуги',
         {
-            "fields": ["header_house", "description_house", "house"],
+            "fields": ["header_house", "description_house", "description_spa_services", "house"],
         },
     ),
     (

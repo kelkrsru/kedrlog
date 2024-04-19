@@ -49,6 +49,7 @@
               </tbody>
             </table>
             {% if price_content.description_house %}<div class="card-text" id="description-houses">{{ price_content.description_house|safe }}</div>{% endif %}
+            {% if price_content.description_spa_services %}<div class="card-text price-content-desc-spa" id="description-houses">{{ price_content.description_spa_services|safe }}</div>{% endif %}
             <h5 class="card-title">{{ price_content.header_service }}</h5>
             <table class="table">
               <thead>

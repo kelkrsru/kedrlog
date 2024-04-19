@@ -143,6 +143,11 @@ class ContentPrice(Content):
         blank=True,
         null=True
     )
+    description_spa_services = RichTextField(
+        verbose_name='Описание для программ парения',
+        blank=True,
+        null=True
+    )
     header_service = models.CharField(
         verbose_name='Заголовок для дополнительных услуг',
         max_length=1024,
