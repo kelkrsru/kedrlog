@@ -145,6 +145,7 @@ ADMIN_REORDER = (
     {'label': 'Основные настройки сайта', 'app': 'core', 'models': [
         'core.Company',
         'core.SocialNetworks',
+        'common.Badge',
     ]},
     {'label': 'Структура Главной страницы', 'app': 'mainpage', 'models': [
         'mainpage.ContentBlockMain',

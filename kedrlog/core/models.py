@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from bitrix24 import Bitrix24
 from ckeditor.fields import RichTextField
-from common.models import CreatedModel, GalleryItem, Seo
+from common.models import CreatedModel, GalleryItem, Seo, Badge
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -532,6 +532,15 @@ class SpaServices(CreatedModel):
         help_text='Изображение отображается в шапке карточки на странице Спа-программы',
         blank=True,
         upload_to='img/spa/'
+    )
+    badge = models.ForeignKey(
+        Badge,
+        verbose_name='Плашка',
+        help_text='Плашка на карточке товара',
+        related_name='spa_services',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
     id_catalog_b24 = models.PositiveIntegerField(
         verbose_name='ID товара/услуги',

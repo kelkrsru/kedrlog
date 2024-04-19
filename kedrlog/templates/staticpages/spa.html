@@ -15,6 +15,11 @@
         <div class="col-12 col-md-6 mt-3 d-flex">
           <div class="card price-card flex-fill">
             <img src="{{ service.header_image.url }}" class="card-img-top" alt="price">
+            {% if service.badge %}
+              <span class="position-absolute start-100 badge badge-spa {{ service.badge.background }}">
+                {{ service.badge.text }}
+              </span>
+            {% endif %}
             <div class="card-body">
               <h5 class="card-title">Парение "{{ service.name }}"</h5>
               <div class="order-page-div"><span></span></div>

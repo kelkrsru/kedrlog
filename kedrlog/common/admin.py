@@ -12,10 +12,15 @@
 #
 #
 # admin.site.register(Portals, PortalsAdmin)
-from common.models import GalleryItem
+from common.models import GalleryItem, Badge
 from django.contrib import admin
 
 
 @admin.register(GalleryItem)
 class GalleryItemAdmin(admin.ModelAdmin):
+    list_display = ['name', ]
+
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
     list_display = ['name', ]

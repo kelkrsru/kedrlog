@@ -130,6 +130,38 @@ class TextContent(Content):
     class Meta:
         abstract = True
 
+
+class Badge(CreatedModel):
+    """Класс для плашек на карточки товара или другие элементы."""
+    class ColorBackground(models.TextChoices):
+        PRIMARY = 'bg-primary', 'Синий'
+        SECONDARY = 'bg-secondary', 'Серый'
+        SUCCESS = 'bg-success', 'Зеленый'
+        DANGER = 'bg-danger', 'Красный'
+        DARK = 'bg-dark', 'Черный'
+
+    name = models.CharField(
+        'Наименование',
+        max_length=255
+    )
+    text = models.CharField(
+        'Текст на плашке',
+        max_length=30,
+    )
+    background = models.CharField(
+        'Цвет фона плашки',
+        max_length=30,
+        choices=ColorBackground.choices,
+        default=ColorBackground.SUCCESS
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Плашка'
+        verbose_name_plural = 'Плашки'
+
 #
 # class Portals(models.Model):
 #     """Модель портала Битрикс24"""
