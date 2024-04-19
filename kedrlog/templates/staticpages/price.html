@@ -48,7 +48,7 @@
                 {% endfor %}
               </tbody>
             </table>
-            {% if price_content.description_house %}<p class="card-text" id="description-houses">{{ price_content.description_house }}</p>{% endif %}
+            {% if price_content.description_house %}<div class="card-text" id="description-houses">{{ price_content.description_house|safe }}</div>{% endif %}
             <h5 class="card-title">{{ price_content.header_service }}</h5>
             <table class="table">
               <thead>
@@ -68,7 +68,7 @@
                 {% endfor %}
               </tbody>
             </table>
-            {% if price_content.description_service %}<p class="card-text">{{ price_content.description_service }}</p>{% endif %}
+            {% if price_content.description_service %}<div class="card-text">{{ price_content.description_service|safe }}</div>{% endif %}
           </div>
         </div>
       </div>

@@ -138,9 +138,8 @@ class ContentPrice(Content):
         verbose_name='Заголовок для основных услуг',
         max_length=1024,
     )
-    description_house = models.CharField(
+    description_house = RichTextField(
         verbose_name='Описание для основных услуг',
-        max_length=1024,
         blank=True,
         null=True
     )
@@ -148,7 +147,7 @@ class ContentPrice(Content):
         verbose_name='Заголовок для дополнительных услуг',
         max_length=1024,
     )
-    description_service = models.CharField(
+    description_service = RichTextField(
         verbose_name='Описание для дополнительных услуг',
         max_length=1024,
         blank=True,
