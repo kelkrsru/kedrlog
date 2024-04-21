@@ -756,6 +756,11 @@ class OrderGiftCertificate(CreatedModel):
         max_length=20,
         blank=True
     )
+    used = models.BooleanField(
+        'Использован',
+        help_text='Сертификат уже использован клиентом',
+        default=False
+    )
     sent_email = models.BooleanField(
         'Отправлено на email',
         help_text='Сертификат и детали заказа отправлены на email клиента',

@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
+
 import staticpages.models as static_pages_models
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
@@ -33,7 +35,7 @@ FIELDSETS_FOR_PRICE = [
     (
         None,
         {
-            "fields": ["active", "name", "header", "second_header", "header_image"],
+            "fields": ["active", "name", "header", "second_header", "header_image", "header_image_preview"],
         },
     ),
     (
@@ -148,6 +150,12 @@ class ContentPriceAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_PRICE
+    readonly_fields = ['header_image_preview']
+
+    @staticmethod
+    @admin.display(description="Предварительный просмотр изображения")
+    def header_image_preview(obj):
+        return mark_safe(f'<img src="{obj.header_image.url}" style="max-height: 200px;">')
 
 
 @admin.register(static_pages_models.ContentSpa)

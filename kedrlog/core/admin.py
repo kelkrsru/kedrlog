@@ -186,7 +186,7 @@ class OrderGiftCertificateAdmin(admin.ModelAdmin):
         (
             'Стоимость и оплата',
             {
-                'fields': ['price','paid', 'buy_date_time'],
+                'fields': ['price','paid', 'buy_date_time', 'used'],
             },
         ),
         (
