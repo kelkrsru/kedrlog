@@ -132,6 +132,12 @@ class SettingsSiteAdmin(admin.ModelAdmin):
                 "fields": ['reserve_start_time', 'reserve_end_time', 'reserve_closed', 'reserve_closed_all'],
             },
         ),
+        (
+            'Настройки подарочных сертификатов',
+            {
+                "fields": ['gift_certificate_closed', 'gift_certificate_closed_all', 'text_gift_certificate_closed', ],
+            },
+        ),
     ]
 
 

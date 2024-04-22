@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 
-from core.models import Company, GiftCertificate, OrderGiftCertificate
+from core.models import Company, GiftCertificate, OrderGiftCertificate, SettingsSite
 from django.shortcuts import get_object_or_404, render
 import staticpages.models as static_pages_models
 from staticpages.forms import OrderGiftCertificateForm
@@ -101,8 +101,12 @@ def page_gift_certificate(request):
         'one_cert': False
     }
     # Заглушка для простых пользователей
-    if not request.user.is_superuser and not request.user.is_staff:
-        return render(request, 'staticpages/gift_certificate_closed.html', context)
+    settings_site = get_object_or_404(SettingsSite, active=True)
+    context_closed = {'company': COMPANY, 'text': settings_site.text_gift_certificate_closed}
+    if settings_site.gift_certificate_closed_all and not request.user.is_superuser:
+        return render(request, 'staticpages/gift_certificate_closed.html', context_closed)
+    if settings_site.gift_certificate_closed and not request.user.is_superuser and not request.user.is_staff:
+        return render(request, 'staticpages/gift_certificate_closed.html', context_closed)
 
     if gift_certificate_content.gift_certificates.count() == 1:
         gift_cert = gift_certificate_content.gift_certificates.first()
