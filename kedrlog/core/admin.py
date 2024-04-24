@@ -135,7 +135,8 @@ class SettingsSiteAdmin(admin.ModelAdmin):
         (
             'Настройки подарочных сертификатов',
             {
-                "fields": ['gift_certificate_closed', 'gift_certificate_closed_all', 'text_gift_certificate_closed', ],
+                "fields": ['gift_certificate_closed', 'gift_certificate_closed_all', 'text_gift_certificate_closed',
+                           'text_gift_certificate_ok'],
             },
         ),
     ]
