@@ -139,6 +139,8 @@ class Badge(CreatedModel):
         SUCCESS = 'bg-success', 'Зеленый'
         DANGER = 'bg-danger', 'Красный'
         DARK = 'bg-dark', 'Черный'
+        BRAND_GREEN = 'bg-green', 'Фирменный зеленый'
+        BRAND_BROWN = 'bg-brown', 'Фирменный коричневый'
 
     name = models.CharField(
         'Наименование',

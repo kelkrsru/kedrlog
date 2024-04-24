@@ -1000,6 +1000,13 @@ class SettingsSite(CreatedModel):
                   'сертификатов',
         default='Возможность оформления подарочного сертификата закрыта.'
     )
+    text_gift_certificate_ok = RichTextField(
+        'Текст страницы успеха',
+        help_text='Текст, который отображается на странице после успешного оформления подарочного сертификата, под '
+                  'параметрами сертификата.',
+        default='Спасибо, что вы с нами.',
+        blank=True
+    )
 
     def __str__(self):
         return self.name

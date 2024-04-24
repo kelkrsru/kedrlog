@@ -42,8 +42,12 @@
               </ul>
               <div class="house-selector__modal-divider"></div>
               <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
-
-                {{ min_cost|get_item:house.house.pk }}
+{#                {{ min_cost|get_item:house.house.pk }}#}
+                {% if house.house.floor == 1 %}
+                  2800
+                {% else %}
+                  3500
+                {% endif %}
               </span> руб./час</div>
 
               <div class="house-selector__modal-btn-wrapper">
@@ -103,7 +107,14 @@
             <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
           </ul>
           <div class="house-selector__modal-divider"></div>
-          <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">{{ min_cost|get_item:house.house.pk }}</span> руб./час</div>
+          <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
+{#            {{ min_cost|get_item:house.house.pk }}#}
+            {% if house.house.floor == 1 %}
+              2800
+            {% else %}
+              3500
+            {% endif %}
+          </span> руб./час</div>
 
           <div class="house-selector__modal-btn-wrapper">
             <div class="house-selector__modal-btn-flex-section">

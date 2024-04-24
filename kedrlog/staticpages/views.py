@@ -1,4 +1,4 @@
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalFormView
+from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -154,4 +154,10 @@ class OrderGiftCertificateCreateView(BSModalCreateView):
 class OrderGiftCertificateDetailView(DetailView):
     template_name = 'staticpages/gift_certificate_ok.html'
     model = OrderGiftCertificate
-    extra_context = {'company': COMPANY}
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderGiftCertificateDetailView, self).get_context_data(**kwargs)
+        settings_site = get_object_or_404(SettingsSite, active=True)
+        context['company'] = COMPANY
+        context['text'] = settings_site.text_gift_certificate_ok
+        return context
