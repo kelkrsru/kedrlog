@@ -31,7 +31,7 @@
         </tbody>
       </table>
       </div>
-      <p>{{ text|safe }}</p>
+      <p>{% if text %}{{ text|safe }}{% endif %}</p>
     </div>
   </div>
 {% endblock %}

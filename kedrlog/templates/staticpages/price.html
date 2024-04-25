@@ -87,18 +87,16 @@
               while(i < tds.length) {
                   let value = parseFloat(tds[i].innerHTML.split(' ')[0]) + 1000;
                   tds[i].innerHTML = '' + value + ' ' + '<i class="fa fa-ruble"></i>';
-                  console.log(tds[i].innerHTML);
                   i++;
               }
               if (desc) {
-                  desc.innerHTML = '{{ price_content.description_house }}';
+                  desc.innerHTML = '{{ price_content.description_house|safe }}';
               }
           }
           else if (this.id === 'four-guests') {
               while(i < tds.length) {
                   let value = parseFloat(tds[i].innerHTML.split(' ')[0]) - 1000;
                   tds[i].innerHTML = '' + value + ' ' + '<i class="fa fa-ruble"></i>';
-                  console.log(tds[i].innerHTML);
                   i++;
               }
               if (desc) {
