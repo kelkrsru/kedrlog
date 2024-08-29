@@ -1,5 +1,4 @@
 from urllib.parse import urlparse
-
 from bitrix24 import Bitrix24
 from ckeditor.fields import RichTextField
 from common.models import CreatedModel, GalleryItem, Seo, Badge
@@ -99,11 +98,6 @@ class House(CreatedModel):
         verbose_name='Максимальное количество гостей',
         default=10
     )
-    cost_include = models.CharField(
-        max_length=128,
-        verbose_name='Стоимость включает',
-        blank=True
-    )
     cleaning = models.PositiveSmallIntegerField(
         verbose_name='Время на уборку в часах',
         help_text='Если 0, то уборка отсутствует',
@@ -165,46 +159,96 @@ class AdditionalFeatures(CreatedModel):
         verbose_name_plural = 'Дополнительные характеристики'
 
 
-class Rate(CreatedModel):
-    """Класс Тариф."""
-    active = models.BooleanField(
-        verbose_name='Активность',
-        help_text='Выбор активного тарифа для Парной',
+class Weeks(CreatedModel):
+    """Класс дней недели."""
+    MSG_MIN_MAX = 'Убедитесь что данное значение от 1 до 7'
+    MSG_UNIQUE = 'Убедитесь, что данное значение является уникальным'
+
+    name = models.CharField(
+        'Наименование',
+        help_text='Наименование дня недели',
+        max_length=255
+    )
+    number = models.PositiveSmallIntegerField(
+        'Порядковый номер',
+        help_text='Порядковый номер дня недели',
+        validators=[MinValueValidator(1, MSG_MIN_MAX), MaxValueValidator(7, MSG_MIN_MAX)],
+        unique=True,
+        error_messages={'unique': MSG_UNIQUE}
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'День недели'
+        verbose_name_plural = 'Дни недели'
+
+
+class Price(CreatedModel):
+    """Класс цен для тарифа."""
+
+    price = models.DecimalField(
+        'Цена',
+        help_text='Цена за 1 час',
+        max_digits=10,
+        decimal_places=2,
+    )
+    day_period_validity = models.ManyToManyField(
+        Weeks,
+        verbose_name='Период действия, день',
+        help_text='Дни, в которые будет действовать данная цена',
+    )
+    is_active_in_weekend_day = models.BooleanField(
+        'Действует в праздничный день',
+        help_text='Праздничные дни берутся из справочника Праздничные дни.',
         default=False
     )
+
+    def __str__(self):
+        return (f'Цена {self.price} в {", ".join(self.day_period_validity.all().values_list("name", flat=True))}'
+                f'{" и Праздничный день" if self.is_active_in_weekend_day else ""}')
+
+    class Meta:
+        verbose_name = 'Цена'
+        verbose_name_plural = 'Цены'
+
+
+class Rate(CreatedModel):
+    """Класс Тариф."""
     name = models.CharField(
         verbose_name='Наименование',
         max_length=255
     )
-    description = models.CharField(
+    comment = models.CharField(
+        'Комментарий',
+        help_text='Рабочий комментарий, например этажность парной',
+        blank=True,
+        max_length=1024
+    )
+    description = models.TextField(
         verbose_name='Описание',
-        max_length=255,
         blank=True
     )
-    house = models.ForeignKey(
+    house = models.ManyToManyField(
         House,
         verbose_name='Парная',
-        related_name='rate_house',
-        on_delete=models.CASCADE
+        related_name='house_rates',
     )
-    price = models.DecimalField(
+    price = models.ManyToManyField(
+        Price,
         verbose_name='Цена',
-        help_text='Цена за 1 час в обычный день пн, вт, ср, чт',
-        max_digits=10,
-        decimal_places=2,
-        default=0.00,
-    )
-    price_weekend = models.DecimalField(
-        verbose_name='Цена выходного дня',
-        help_text='Цена за 1 час в выходной день пт, сб, вс и праздники',
-        max_digits=10,
-        decimal_places=2,
-        default=0.00,
+        help_text='Цены тарифа',
+        related_name='price_rates'
     )
     min_time = models.PositiveSmallIntegerField(
         verbose_name='Минимальное время парения',
         help_text='Минимальное время парения в часах',
         default=3
+    )
+    max_guest = models.PositiveSmallIntegerField(
+        'Максимальное количество гостей',
+        default=12
     )
     guests_in_price = models.PositiveSmallIntegerField(
         verbose_name='Количество гостей, включенных в стоимость',
@@ -222,16 +266,15 @@ class Rate(CreatedModel):
         blank=True,
         null=True
     )
-    id_rent_weekend_in_catalog_b24 = models.PositiveIntegerField(
-        verbose_name='ID товара аренды выходного дня в каталоге Битрикс24',
-        blank=True,
-        null=True
-    )
     id_additional_guest_in_catalog_b24 = models.PositiveIntegerField(
         verbose_name='ID товара дополнительного гостя в каталоге Битрикс24',
         blank=True,
         null=True
     )
+
+    def get_min_price(self):
+        """Получить минимальную цену в тарифе."""
+        return min(self.price.all().values_list('price', flat=True))
 
     @staticmethod
     def is_day_of(date):
@@ -246,13 +289,13 @@ class Rate(CreatedModel):
             return self.price_weekend
         return self.price
 
-    def save(self, *args, **kwargs):
-        if self.active:
-            Rate.objects.filter(active=True, house=self.house).update(active=False)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.active:
+    #         Rate.objects.filter(active=True, house=self.house).update(active=False)
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return f'{self.name}{" " + self.comment if self.comment else ""}'
 
     class Meta:
         verbose_name = 'Тариф'
@@ -582,6 +625,7 @@ class GiftCertificateType(CreatedModel):
 
 class GiftCertificate(CreatedModel):
     """Класс Подарочный сертификат."""
+
     class ColorText(models.TextChoices):
         WHITE = 'white', 'Белый'
         DARK = 'dark', 'Черный'

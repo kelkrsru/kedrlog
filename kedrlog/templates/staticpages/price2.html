@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if price_content.seo_title %}{{ price_content.seo_title }}{% else %}{{ company.name }} - {{ price_content.header }}{% endif %}
+{% endblock %}
+{% block seo_description %}"{{ price_content.seo_description }}"{% endblock %}
+{% block seo_keywords %}"{{ price_content.seo_keywords }}"{% endblock %}
+{% block content %}
+  {% include 'includes/content_page_header.html' with subtitle_h2=price_content.header subtitle_span=price_content.second_header %}
+
+{% load user_filters %}
+  <div class="container price-content mb-5">
+    <div class="row flex-row justify-content-center">
+      <div class="col-12 col-md-8 text-center">
+        <h3 class="text-color-brown">{{ price_content.header_house }}</h3>
+      </div>
+    </div>
+    <div class="row flex-row justify-content-center">
+      {% for house in houses %}
+        <div class="col col-lg-4 col-md-6 col-12 mt-3 d-flex">
+          <div class="card price-card flex-fill">
+          {% if price_content.is_show_card_image %}
+            <img src="{{ house.photo_main.image_small.url }}" class="card-img-top" alt="price">
+          {% endif %}
+            <div class="card-title m-4">
+              <h5>{{ house.name }}</h5>
+              <span class="fw-bold">Выберите тариф:</span>
+              <div class="row flex-row mt-2 ms-0">
+                {% for rate in house.house_rates.all %}
+                  <div class="col-6 form-check">
+                    <input class="form-check-input" type="radio" name="rates-{{ house.id }}" id="rate-{{ house.id }}-{{ rate.id }}" data-rateid="{{ rate.id }}" data-houseid="{{ house.id }}" onchange="get_fill_rate(this)" {% if not forloop.counter0 %}checked{% endif %}>
+                    <label class="form-check-label" for="rate-{{ house.id }}-{{ rate.id }}">{{ rate.name }}</label>
+                  </div>
+                {% endfor %}
+              </div>
+{#              <div class="form-floating">#}
+{#                <select class="form-select" name="rates" id="rates-{{ house.id }}" onchange="FillDuration(this)">#}
+{#                  <option value="0" selected>Не выбрано</option>#}
+{#                    {% for rate in house.house_rates.all %}#}
+{#                      <option value="{{ rate.id }}">{{ rate.name }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#                <label for="rates-{{ house.id }}">Выберите тариф</label>#}
+{#              </div>#}
+              <div class="order-page-div mb-0"><span></span></div>
+            </div>
+
+            <div class="card-body">
+              {% with house.house_rates.all|first as rate %}
+                <p class="card-text mb-1">Этажность парной: <b>{{ house.floor|ru_plural:"этаж,этажа,этажей" }}</b></p>
+                <p class="card-text mb-1">Количество комнат отдыха: <b>{{ house.restroom|ru_plural:"зона,зоны,зон" }} релакса</b></p>
+                <p class="card-text mb-1" id="min-time-{{ house.id }}"></p>
+                <p class="card-text mb-1" id="max-guest-{{ house.id }}"></p>
+                <p class="card-text mb-1" id="guests-in-price-{{ house.id }}"></p>
+                <p class="card-text mb-1" id="additional-guest-price-{{ house.id }}"></p>
+                <table class="table" id="table-prices-{{ house.id }}">
+{#                    <tr>#}
+{#                      <td>#}
+{#                        {% for day in price.day_period_validity.all %}#}
+{#                          {{ day.name }}<br>#}
+{#                        {% endfor %}#}
+{#                      </td>#}
+{#                      <td class="text-end align-middle fw-bold text-color-green">#}
+{#                        {{ price.price|floatformat }} <i class="fa fa-ruble"></i>#}
+{#                      </td>#}
+{#                    </tr>#}
+                </table>
+              {% endwith %}
+            </div>
+            <div class="card-footer text-end">
+
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="container mt-5">
+      <div class="row flex-row justify-content-center">
+        <div class="col-12 col-md-8">
+          {% if price_content.description_house %}<div class="card-text" id="description-houses">{{ price_content.description_house|safe }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="row flex-row justify-content-center">
+        <div class="col-12 col-md-8">
+          {% if price_content.description_spa_services %}<div class="card-text price-content-desc-spa" id="description-houses">{{ price_content.description_spa_services|safe }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-5">
+      <div class="row flex-row justify-content-center">
+        <div class="col-12 col-md-8 text-center">
+          <h3 class="text-color-brown">{{ price_content.header_service }}</h3>
+        </div>
+      </div>
+      <div class="row flex-row justify-content-center">
+        <div class="col-12 col-md-8">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-7">Услуга</th>
+  {#                  <th scope="col" class="col-3">Ед. изм</th>#}
+                <th scope="col" class="col-5">Цена</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for service in services %}
+                <tr>
+                  <td>{{ service.name }}</td>
+  {#                    <td>{{ service.get_measure_display }}</td>#}
+                  <td class="text-color-green">{{ service.price|floatformat }} <i class="fa fa-ruble"></i></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      <div class="row flex-row justify-content-center">
+        <div class="col-12 col-md-8">
+          {% if price_content.description_service %}<div class="card-text">{{ price_content.description_service|safe }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+  </div>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+    let selected = $('input[type=radio]:checked');
+    for (let i = 0; i < selected.length; i++) {
+        get_fill_rate(selected[i]);
+    }
+
+    function declOfNum(number, words) {
+      return words[(number % 100 > 4 && number % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? Math.abs(number) % 10 : 5]];
+    }
+
+    function get_fill_rate(object) {
+      let rate_id = object.dataset.rateid;
+      let house_id = object.dataset.houseid;
+      $.ajax({
+        url: "{% url 'get-rate' %}",
+        type: "POST",
+        data: {"csrfmiddlewaretoken": "{{ csrf_token }}", "rate_id": rate_id},
+        success: function (response) {
+            const min_time = response.rate.min_time;
+            const max_guest = response.rate.max_guest;
+            const guests_in_price = response.rate.guests_in_price;
+            const additional_guest_price = response.rate.additional_guest_price;
+            let min_time_text = document.querySelector('#min-time-' + house_id);
+            let max_guest_text = document.querySelector('#max-guest-' + house_id);
+            let guests_in_price_text = document.querySelector('#guests-in-price-' + house_id);
+            let additional_guest_price_text = document.querySelector('#additional-guest-price-' + house_id);
+            min_time_text.innerHTML = 'Минимальное время парения: <b>' + min_time + ' ' + declOfNum(min_time, ['час','часа','часов',]) + '</b>';
+            max_guest_text.innerHTML = 'Максимальное число гостей: <b>' + max_guest + ' ' + declOfNum(max_guest, ['человек','человека','человек',]) + '</b>';
+            guests_in_price_text.innerHTML = 'В стоимость аренды входит: <b>' + guests_in_price + ' ' + declOfNum(guests_in_price, ['комплект','комплекта','комплектов',]) + ' шапочек/тапочек/полотенец</b>';
+            if (additional_guest_price > 0) {
+                additional_guest_price_text.innerHTML = 'Дополнительные гости: <b>' + Math.round(additional_guest_price) + ' <i class="fa fa-ruble"></i> за каждого гостя на все время пребывания</b>';
+            }
+            else {
+                additional_guest_price_text.innerHTML = 'Дополнительные гости: <b>не допускаются</b>';
+            }
+            const prices = response.prices;
+            let table_prices = document.querySelector('#table-prices-' + house_id);
+            let tbody_prices = table_prices.getElementsByTagName('tbody')[0];
+            if (tbody_prices) { tbody_prices.remove() }
+            tbody_prices = document.createElement('tbody');
+            table_prices.appendChild(tbody_prices);
+            for (const days in prices) {
+                let row = document.createElement('tr');
+                let cell_days = document.createElement('td');
+                let cell_price = document.createElement('td');
+                cell_days.innerHTML = days;
+                cell_price.classList.add('text-end', 'align-middle', 'fw-bold', 'text-color-green');
+                cell_price.innerHTML = prices[days] + ' <i class="fa fa-ruble"></i>';
+                row.appendChild(cell_days);
+                row.appendChild(cell_price);
+                tbody_prices.appendChild(row);
+            }
+
+
+        },
+        error: function() {
+            alert('Ошибка');
+        }
+      });
+    }
+  </script>
+{% endblock %}

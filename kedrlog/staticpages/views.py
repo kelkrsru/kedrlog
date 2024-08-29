@@ -1,11 +1,17 @@
+import json
+
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth import get_user_model
-from django.http import HttpResponseRedirect
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
+from django.forms import model_to_dict
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 
-from core.models import Company, GiftCertificate, OrderGiftCertificate, SettingsSite
-from django.shortcuts import get_object_or_404, render
+from core.models import Company, GiftCertificate, OrderGiftCertificate, SettingsSite, House, Rate, Price, \
+    AdditionalServices
+from django.shortcuts import get_object_or_404, render, get_list_or_404
 import staticpages.models as static_pages_models
 from staticpages.forms import OrderGiftCertificateForm
 
@@ -65,15 +71,32 @@ def page_text_content(request):
 
 def page_price(request):
     """Метод страницы с ценами."""
-    template = 'staticpages/price.html'
+    template = 'staticpages/price2.html'
 
     price_content = get_object_or_404(static_pages_models.ContentPrice, active=True)
+    houses = House.objects.filter(active=True, house_rates__isnull=False).distinct()
+    services = get_list_or_404(AdditionalServices, active=True)
 
     context = {
         'company': COMPANY,
-        'price_content': price_content
+        'price_content': price_content,
+        'houses': houses,
+        'services': services,
     }
     return render(request, template, context)
+
+
+def get_rate(request):
+    """Метод получения информации о тарифе."""
+    rate_id = request.POST.get('rate_id')
+    rate = Rate.objects.get(id=rate_id)
+    prices = rate.price.all()
+    rate = model_to_dict(rate, fields=['name', 'min_time', 'max_guest', 'guests_in_price', 'additional_guest_price'])
+    prices_rate = {}
+    for price in prices:
+        prices_rate['<br>'.join(price.day_period_validity.all().values_list('name', flat=True))] = str(round(price.price))
+
+    return JsonResponse({'result': 'Success', 'rate': rate, 'prices': prices_rate})
 
 
 def page_spa(request):

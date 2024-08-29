@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (AdditionalFeatures, AdditionalServices, Company, House,
                      PriceForSpaServices, Rate, Reserve, ReserveServices,
                      SettingsBitrix24, SettingsSite, SocialNetworks,
-                     SpaServices, WeekendDays, GiftCertificate, GiftCertificateType, OrderGiftCertificate)
+                     SpaServices, WeekendDays, GiftCertificate, GiftCertificateType, OrderGiftCertificate, Weeks, Price)
 
 admin.site.enable_nav_sidebar = False
 
@@ -63,23 +63,32 @@ class PriceForSpaServicesAdmin(admin.ModelAdmin):
     list_display = ['price', 'max_guest', 'duration']
 
 
+@admin.register(Weeks)
+class WeeksAdmin(admin.ModelAdmin):
+    list_display = ['name', ]
+    ordering = ['number']
+
+
+@admin.register(Price)
+class PriceAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(Rate)
 class RateAdmin(admin.ModelAdmin):
-    list_display = ['name', 'house', 'active', ]
-    ordering = ['house__name', '-active', 'name', ]
+    ordering = ['house__name', 'name', ]
     fieldsets = [
         (
             None,
             {
-                "fields": ["active", "name", "description", "house", "price", "price_weekend", "min_time",
+                "fields": ["name", "comment", "description", "house", "price", "min_time", 'max_guest',
                            "guests_in_price", "additional_guest_price"],
             },
         ),
         (
             'Интеграция с Битрикс24',
             {
-                "fields": ['id_rent_in_catalog_b24', 'id_rent_weekend_in_catalog_b24',
-                           'id_additional_guest_in_catalog_b24'],
+                "fields": ['id_rent_in_catalog_b24', 'id_additional_guest_in_catalog_b24'],
             },
         ),
     ]

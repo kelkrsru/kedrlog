@@ -61,8 +61,29 @@ def multiply(qty, unit_price):
 
 @register.simple_tag
 def tax_sum(qty, unit_price, rate):
-    sum = decimal.Decimal(qty) * decimal.Decimal(unit_price)
-    return round(sum * decimal.Decimal(rate) / 100, 2)
+    total = decimal.Decimal(qty) * decimal.Decimal(unit_price)
+    return round(total * decimal.Decimal(rate) / 100, 2)
+
+
+@register.filter
+def ru_plural(value, variants):
+    variants = variants.split(",")
+    value = abs(int(value))
+
+    if value % 10 == 1 and value % 100 != 11:
+        variant = 0
+    elif 2 <= value % 10 <= 4 and (value % 100 < 10 or value % 100 >= 20):
+        variant = 1
+    else:
+        variant = 2
+
+    return f'{value} {variants[variant]}'
+
+
+@register.filter
+def get_item_queryset(queryset, elem_id):
+
+    return queryset.get(id=elem_id)
 
 
 register.filter('addclass', addclass)
