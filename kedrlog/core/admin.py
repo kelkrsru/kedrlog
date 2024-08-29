@@ -76,7 +76,7 @@ class PriceAdmin(admin.ModelAdmin):
 
 @admin.register(Rate)
 class RateAdmin(admin.ModelAdmin):
-    ordering = ['house__name', 'name', ]
+    ordering = ['name', ]
     fieldsets = [
         (
             None,
