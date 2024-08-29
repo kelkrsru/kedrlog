@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from staticpages.views import (page_gallery, page_price, page_spa, page_gift_certificate,
+from staticpages.views import (page_gallery, page_price, page_spa, page_gift_certificate, get_rate,
                                page_text_content, OrderGiftCertificateCreateView, OrderGiftCertificateDetailView)
 
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
     path('fz152/', page_text_content, name='fz152'),
     path('accessories/', page_text_content, name='accessories'),
     path('price/', page_price, name='price'),
+    path('get-rate/', get_rate, name='get-rate'),
     path('spa/', page_spa, name='spa'),
     path('corporate/', page_text_content, name='corporate'),
     path('certificate/', page_gift_certificate, name='certificate'),

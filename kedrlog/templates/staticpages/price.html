@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {% if text_content.seo_title %}{{ text_content.seo_title }}{% else %}{{ company.name }} - {{ text_content.header }}{% endif %}
+  {% if price_content.seo_title %}{{ price_content.seo_title }}{% else %}{{ company.name }} - {{ price_content.header }}{% endif %}
 {% endblock %}
 {% block seo_description %}"{{ text_content.seo_description }}"{% endblock %}
 {% block seo_keywords %}"{{ text_content.seo_keywords }}"{% endblock %}

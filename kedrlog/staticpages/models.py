@@ -116,19 +116,6 @@ class TextContentCorporate(TextContent):
 
 class ContentPrice(Content):
     """Класс контента для страницы Цены."""
-    house = models.ManyToManyField(
-        House,
-        verbose_name='Парные',
-        help_text='Выберите парные для отображения на странице Цены в основных услугах',
-        related_name='house_content_price'
-    )
-    service = models.ManyToManyField(
-        AdditionalServices,
-        verbose_name='Дополнительные услуги',
-        help_text='Выберите дополнительные услуги',
-        related_name='service_content_price',
-        blank=True,
-    )
     header_image = models.ImageField(
         verbose_name='Файл основного изображения',
         blank=True,
@@ -137,6 +124,11 @@ class ContentPrice(Content):
     header_house = models.CharField(
         verbose_name='Заголовок для основных услуг',
         max_length=1024,
+    )
+    is_show_card_image = models.BooleanField(
+        'Показывать фото в карточке',
+        help_text='Показывать фото в карточке тарифа парной',
+        default=False,
     )
     description_house = RichTextField(
         verbose_name='Описание для основных услуг',

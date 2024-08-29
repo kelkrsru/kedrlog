@@ -172,6 +172,8 @@ ADMIN_REORDER = (
     {'label': 'Ресурсы', 'app': 'core', 'models': [
         'core.House',
         'core.AdditionalFeatures',
+        'core.Weeks',
+        'core.Price',
         'core.Rate',
         'core.AdditionalServices',
         'core.SpaServices',
@@ -191,3 +193,9 @@ ADMIN_REORDER = (
         'auth.Group',
     ]},
 )
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'versionCheck': False
+    }
+}
