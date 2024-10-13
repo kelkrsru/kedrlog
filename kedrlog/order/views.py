@@ -3,6 +3,9 @@ import json
 
 from bitrix24 import Bitrix24
 from bitrix24.exceptions import BitrixError
+from django.core import serializers
+from django.db.models import Max
+
 from common.views import user_get_or_create_in_site, contact_get_or_create_in_b24
 from core.models import (AdditionalServices, Company, House, Rate, Reserve, ReserveServices, SettingsBitrix24,
                          SettingsSite)
@@ -17,7 +20,7 @@ COMPANY = Company.objects.get(active=True)
 
 def index(request):
     """Метод главной страницы."""
-    template = 'order/index.html'
+    template = 'order/index-new.html'
 
     if request.method != 'POST':
         return render(request, 'error.html', {'error_name': 'Неизвестный тип запроса'})
@@ -30,34 +33,42 @@ def index(request):
     if settings_site.reserve_closed and not request.user.is_superuser and not request.user.is_staff:
         return render(request, 'order/reserve_closed.html', {'company': COMPANY})
 
-    house = get_object_or_404(House, pk=request.POST.get('house'))
+    houses = House.objects.filter(active=True)
     date = timezone.datetime.strptime(request.POST.get('date'), '%Y-%m-%d').date()
     duration = int(request.POST.get('duration'))
-    rate = house.rate_house.get(active=True)
-    price_house = rate.get_price(date)
-    price_house_tomorrow = rate.get_price(date + timezone.timedelta(days=1))
+    max_guests = Rate.objects.filter(id__in=houses.values('house_rates')).aggregate(Max("max_guest"))
+    print(max_guests)
+    #price_house = rate.get_price(date)
+    #price_house_tomorrow = rate.get_price(date + timezone.timedelta(days=1))
 
-    start_date_time_busy, start_date_time_allow = Reserve.get_start_busy_and_allow(date, house, duration)
+    #start_date_time_busy, start_date_time_allow = Reserve.get_start_busy_and_allow(date, house, duration)
 
     additional_services = AdditionalServices.objects.filter(active=True)
 
     date_time_range = [{'print': f'{i}:00', 'value': timezone.datetime.strptime(request.POST.get('date'), '%Y-%m-%d')
                         + timezone.timedelta(hours=i)} for i in range(24)]
 
+    data = {
+        'houses': serializers.serialize('json', houses)
+    }
+    print(data)
+
     context = {
         'company': COMPANY,
-        'house': house,
+        'houses': houses,
         'start_date': date,
         'duration': duration,
-        'start_date_time_busy': start_date_time_busy,
-        'start_date_time_allow': start_date_time_allow,
-        'rate': rate,
-        'price_house': price_house,
-        'price_house_tomorrow': price_house_tomorrow,
+        'max_guests': max_guests.get('max_guest__max'),
+        #'start_date_time_busy': start_date_time_busy,
+        #'start_date_time_allow': start_date_time_allow,
+        #'rates': rates,
+        #'price_house': price_house,
+        #'price_house_tomorrow': price_house_tomorrow,
         'now_date': timezone.datetime.now(),
         'date_time_range': date_time_range,
         'str_start_stop': {'start': [1, 7, 13, 19], 'stop': [6, 12, 18, 24]},
-        'additional_services': additional_services
+        'additional_services': additional_services,
+        'data': data
     }
     return render(request, template, context)
 

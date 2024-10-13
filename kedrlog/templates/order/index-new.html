@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - Оформление заказа{% endblock %}
+{% block content %}
+  {% include 'includes/modals.html' %}
+  {% include 'includes/content_page_header.html' with subtitle_h2='Бронирование' subtitle_span='Оформление заказа' %}
+
+
+<html lang="ru">
+  <div class="container content-page-order">
+    <div id="booking-selector" class="row">
+      <div class="card col-12">
+        <div id="selector-title" class="card-header">
+          <div class="row">
+            <div class="col-12 col-md-5 col-lg-3">
+              <div class="form-floating">
+                <input id="count-guests" type="number" class="form-control" min="1"
+                   value="4" max="{{ max_guests }}">
+                <label for="count-guests">Количество гостей</label>
+              </div>
+            </div>
+            <div class="col-12 col-md-7 col-lg-5">
+              <div class="form-floating">
+                <input id="start-date" type="date" class="form-control" min="{% now "Y-m-d" %}"
+                   value="{{ start_date|date:"Y-m-d" }}">
+                <label for="start-date">Дата парения</label>
+              </div>
+            </div>
+{#            <div class="col">#}
+{#              <div class="form-floating">#}
+{#                <select id="rates" class="form-select">#}
+{#                  {% for rate in rates %}#}
+{#                    <option value="{{ rate.id }}">{{ rate.name }}</option>#}
+{#                  {% endfor %}#}
+{#                </select>#}
+{#                <label for="count-guests">Тариф (зависит от числа гостей)</label>#}
+{#              </div>#}
+{#            </div>#}
+          </div>
+        </div>
+
+        <div id="selector-cards" class="card-body">
+          <div class="row row-cols-1 row-cols-lg-3 flex-row justify-content-center">
+            {% for house in houses %}
+              <div class="col d-flex">
+                <div class="card flex-fill">
+                  <img src="{{ house.photo_main.image_small.url }}" alt="{{ house.name }}">
+                  <div class="card-header">
+                    <div class="row">
+                      <div class="col-8 text-color-brown">
+                        <h5><i class="fa fa-home" aria-hidden="true"></i> {{ house.name }}</h5>
+                      </div>
+                      <div class="col-4 text-color-green">
+                        <i class="fa fa-users"></i> до {{ house.max_guests }}
+                      </div>
+                    </div>
+                    <div class="row">
+                      <span>{{ house.description }}</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="form-floating">
+                          <select data-house_id={{ house.id }} class="form-select">
+                            {% for rate in house.house_rates.all %}
+                              <option value="{{ rate.id }}" {% if not forloop.counter0 %}selected{% endif %}>{{ rate.name }}</option>
+                            {% endfor %}
+                          </select>
+                          <label for="count-guests">Тариф (зависит от числа гостей)</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12">
+                        От
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        {{ data|json_script:'test' }}
+
+
+      </div>
+    </div>
+  </div>
+
+</html>
+{% endblock %}
+
+{% block user_scripts %}
+  <script type="application/javascript">
+    function checkCountGuests(event) {
+        const selects_rates = document.querySelectorAll('#selector-cards select');
+        selects_rates.forEach(function (element) {
+            console.log(element.dataset.house_id);
+            console.log('{{ houses }}');
+        })
+        console.log(selects_rates);
+    }
+
+    $(document).ready(function () {
+        const count_guest = document.querySelector('#count-guests');
+        count_guest.addEventListener('change', checkCountGuests);
+    })
+  </script>
+{% endblock %}
+

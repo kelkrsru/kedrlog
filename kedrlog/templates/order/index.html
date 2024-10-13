@@ -16,6 +16,12 @@
       <div class="col-12 col-md-7 ps-5">
         <p class="order-selected-house-header">{{ house.name }}</p>
         <p class="order-selected-house-description">{{ house.description }}</p>
+        <p class="order-selected-house-header">Действующие тарифы:</p>
+        <p class="order-selected-house-description"><select class="form-select">
+          {% for rate in rates %}
+            <option value="{{ rate.id }}">{{ rate.name }}</option>
+          {% endfor %}
+        </select></p>
         <p class="order-selected-house-header">В стоимость входит:</p>
         <div class="row order-selected-house-icon">
           {% for additional in house.additional_features.all %}

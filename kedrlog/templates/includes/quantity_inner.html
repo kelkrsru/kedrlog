@@ -1,10 +1,11 @@
-<div class="quantity_inner mb-3">
+<div class="form-floating quantity_inner mb-3">
   <button class="bt_minus">
-    <svg viewBox="0 0 24 24">
+    <svg viewBox="0 0 5 5">
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
   </button>
-  <input id={{ id }} type="text" value="{{ value }}" class="quantity" data-min-count="{{ min_value }}" data-max-count="{{ max_value }}"/>
+  <input id="{{ id }}" type="text" value="{{ value }}" class="form-control" data-min-count="{{ min_value }}" data-max-count="{{ max_value }}"/>
+  <label for="{{ id }}">{{ label }}</label>
   <button class="bt_plus">
     <svg viewBox="0 0 24 24">
       <line x1="12" y1="5" x2="12" y2="19"></line>
