@@ -8,6 +8,7 @@
 {% block content %}
   {% load user_filters %}
   {% load static %}
+  {% include 'includes/toasts.html' with toast_header=toast_main.header toast_second_header=toast_main.second_header toast_img_path=toast_main.image.url %}
   <div class="background-video">
     <video autoplay="" loop="" muted="">
       <source src="{{ content_block_main.video_mp4.url }}" type="video/mp4">
@@ -179,6 +180,14 @@
               }
           }
       }
+
+      $(document).ready(function () {
+          const main_toast = document.querySelector('#main-toast');
+          const toastBootstrap = bootstrap.Toast.getOrCreateInstance(main_toast);
+          if ('{{ toast_main }}' !== '0') {
+              toastBootstrap.show();
+          }
+      });
   </script>
 {% endblock %}
 

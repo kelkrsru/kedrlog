@@ -2,7 +2,7 @@ from core.models import Company
 from django.shortcuts import render
 from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
                              ContentBlockMain, ContentBlockService,
-                             ContentBlockYandexMap)
+                             ContentBlockYandexMap, ToastMain)
 
 COMPANY = Company.objects.get(active=True)
 
@@ -22,6 +22,7 @@ def index(request):
     content_block_service = ContentBlockService.objects.get(active=True)
     content_block_yandex_map = ContentBlockYandexMap.objects.get(active=True)
     content_block_booking = ContentBlockBooking.objects.get(active=True)
+    toast_main = ToastMain.objects.filter(active=True).first() if ToastMain.objects.filter(active=True) else 0
 
     min_cost, min_time, include_guests = (dict() for _ in range(3))
     for element in content_block_booking.houseshowbooking_set.all():
@@ -35,6 +36,7 @@ def index(request):
     context = {
         'company': COMPANY,
         'content_block_main': content_block_main,
+        'toast_main': toast_main,
         'content_block_infra': content_block_infra,
         'content_block_service': content_block_service,
         'content_block_yandex_map': content_block_yandex_map,

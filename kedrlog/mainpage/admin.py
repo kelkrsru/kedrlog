@@ -2,11 +2,17 @@ from django.contrib import admin
 from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
                              ContentBlockMain, ContentBlockRoundedMenuItem,
                              ContentBlockService, ContentBlockYandexMap,
-                             HouseShowBooking)
+                             HouseShowBooking, ToastMain)
 
 
 @admin.register(ContentBlockMain)
 class ContentBlockMainAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    ordering = ['-active', ]
+
+
+@admin.register(ToastMain)
+class ToastMainAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
 

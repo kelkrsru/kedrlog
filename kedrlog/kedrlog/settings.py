@@ -164,6 +164,7 @@ ADMIN_REORDER = (
         'mainpage.ContentBlockYandexMap',
         'mainpage.ContentBlockBooking',
         'mainpage.ContentBlockRoundedMenuItem',
+        'mainpage.ToastMain',
     ]},
     {'label': 'Статические страницы', 'app': 'staticpages', 'models': [
         'staticpages.GalleryHouses',

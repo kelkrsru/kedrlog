@@ -52,6 +52,24 @@ class ContentBlockMain(ContentBlock):
         verbose_name_plural = 'Главные баннеры'
 
 
+class ToastMain(ContentBlock):
+    """Класс для главного баннера."""
+    header = models.CharField('Заголовок', help_text='Введите заголовок всплывающего окна', max_length=50, null=True,
+                              blank=True)
+    second_header = models.CharField('Подзаголовок', help_text='Введите подзаголовок всплывающего окна', max_length=50,
+                                     null=True, blank=True)
+    image = models.ImageField('Картинка', help_text='Загрузите картинку-баннер', upload_to='img/toasts/')
+
+    def save(self, *args, **kwargs):
+        if self.active:
+            ToastMain.objects.filter(active=True).update(active=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Всплывающее окно'
+        verbose_name_plural = 'Всплывающие окна'
+
+
 class ContentBlockRoundedMenuItem(models.Model):
     """Класс для элементов блока с круглыми иконками."""
     name = models.CharField(
