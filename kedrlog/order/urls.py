@@ -1,13 +1,13 @@
 from django.urls import path
 
-from . import views
+from order import views
 
 app_name = 'order'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('update-house/', views.update_total_section_house, name='update_total_section_house'),
-    path('update-service/', views.update_total_section_service, name='update_total_section_service'),
+    path('get-price/', views.get_price_for_date, name='get-price'),
+    path('get-settings-interval/', views.get_settings_interval, name='get-settings-interval'),
     path('new/', views.new, name='new'),
     path('update/<int:deal_id>/', views.update, name='update'),
     path('delete/<int:deal_id>/', views.delete, name='delete'),

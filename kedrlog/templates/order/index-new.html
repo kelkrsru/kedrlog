@@ -3,39 +3,31 @@
 {% block title %}{{ company.name }} - Оформление заказа{% endblock %}
 {% block content %}
   {% include 'includes/modals.html' %}
+  {% include 'order/reserve_modal.html' %}
   {% include 'includes/content_page_header.html' with subtitle_h2='Бронирование' subtitle_span='Оформление заказа' %}
 
 
-<html lang="ru">
+  <html lang="ru">
+  {% load user_filters %}
   <div class="container content-page-order">
     <div id="booking-selector" class="row">
       <div class="card col-12">
-        <div id="selector-title" class="card-header">
+        <div id="selector-title" class="card-header sticky-top shadow">
           <div class="row">
             <div class="col-12 col-md-5 col-lg-3">
               <div class="form-floating">
-                <input id="count-guests" type="number" class="form-control" min="1"
-                   value="4" max="{{ max_guests }}">
+                <input id="count-guests" type="number" class="form-control" min="1" value="{{ count_guests }}"
+                       max="{{ max_guests }}">
                 <label for="count-guests">Количество гостей</label>
               </div>
             </div>
             <div class="col-12 col-md-7 col-lg-5">
               <div class="form-floating">
-                <input id="start-date" type="date" class="form-control" min="{% now "Y-m-d" %}"
-                   value="{{ start_date|date:"Y-m-d" }}">
-                <label for="start-date">Дата парения</label>
+                <input id="inp-start-date" type="date" class="form-control" min="{% now "Y-m-d" %}"
+                       value="{{ start_date|date:"Y-m-d" }}">
+                <label for="inp-start-date">Дата парения</label>
               </div>
             </div>
-{#            <div class="col">#}
-{#              <div class="form-floating">#}
-{#                <select id="rates" class="form-select">#}
-{#                  {% for rate in rates %}#}
-{#                    <option value="{{ rate.id }}">{{ rate.name }}</option>#}
-{#                  {% endfor %}#}
-{#                </select>#}
-{#                <label for="count-guests">Тариф (зависит от числа гостей)</label>#}
-{#              </div>#}
-{#            </div>#}
           </div>
         </div>
 
@@ -43,14 +35,15 @@
           <div class="row row-cols-1 row-cols-lg-3 flex-row justify-content-center">
             {% for house in houses %}
               <div class="col d-flex">
-                <div class="card flex-fill">
+                <div id="card-{{ house.id }}" class="card flex-fill shadow">
                   <img src="{{ house.photo_main.image_small.url }}" alt="{{ house.name }}">
                   <div class="card-header">
                     <div class="row">
-                      <div class="col-8 text-color-brown">
-                        <h5><i class="fa fa-home" aria-hidden="true"></i> {{ house.name }}</h5>
+                      <div class="col-9 text-color-brown">
+                        <h5 id="house-name-{{ house.id }}"><i class="fa fa-home"></i> {{ house.name }}</h5>
                       </div>
-                      <div class="col-4 text-color-green">
+                      <div class="col-3 text-color-green text-end" data-bs-toggle="tooltip"
+                           title="Максимальная вместимость парной">
                         <i class="fa fa-users"></i> до {{ house.max_guests }}
                       </div>
                     </div>
@@ -62,19 +55,46 @@
                     <div class="row">
                       <div class="col-12">
                         <div class="form-floating">
-                          <select data-house_id={{ house.id }} class="form-select">
+                          <select id="select-rate-{{ house.id }}" data-house_id={{ house.id }} class="form-select">
                             {% for rate in house.house_rates.all %}
-                              <option value="{{ rate.id }}" {% if not forloop.counter0 %}selected{% endif %}>{{ rate.name }}</option>
+                              <option value="{{ rate.id }}"
+                                      {% if not forloop.counter0 %}selected{% endif %}>{{ rate.name }}</option>
                             {% endfor %}
                           </select>
                           <label for="count-guests">Тариф (зависит от числа гостей)</label>
                         </div>
                       </div>
                     </div>
-                    <div class="row">
+                    <div class="row mt-3">
                       <div class="col-12">
-                        От
+                        <p class="card-text mb-1" id="min-price-{{ house.id }}"></p>
+                        <p class="card-text mb-1" id="max-guest-{{ house.id }}"></p>
+                        <p class="card-text mb-1" id="guests-in-price-{{ house.id }}"></p>
+                        <p class="card-text mb-1" id="additional-guest-price-{{ house.id }}"></p>
                       </div>
+                    </div>
+                    <div class="order-page-div"><span></span></div>
+                    <div class="row">
+                      <div id="alert-{{ house.id }}" class="col-12 alert alert-danger" hidden></div>
+                    </div>
+                    <div class="row">
+                      <div id="success-{{ house.id }}" class="col-12 alert alert-light" hidden></div>
+                    </div>
+                    <div class="row mb-3 flex-row justify-content-start start-date-time-row">
+                      {% for date_time in date_time_range %}
+                        <div class="col-2 mt-2">
+                          <div
+                            class="start-date-time {% if date_time.value in start_date_time_busy|get_item:house.id or date_time.value <= now_date_time %}start-date-time-stop{% endif %}"
+                            data-value="{{ date_time.value }}" data-str_value="{{ date_time.str_value }}"
+                            id="start-date-time-{{ house.id }}-{{ forloop.counter0 }}">{{ date_time.print }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="row flex-row justify-content-center">
+                      <button id="btn-booking-{{ house.id }}" class="btn btn-outline-success btn-booking"
+                              disabled></button>
                     </div>
                   </div>
                 </div>
@@ -83,31 +103,56 @@
           </div>
         </div>
 
-        {{ data|json_script:'test' }}
-
-
       </div>
     </div>
   </div>
 
-</html>
+  </html>
 {% endblock %}
 
 {% block user_scripts %}
+  {% load static %}
+  <script src="{% static 'js/order.js' %}"></script>
   <script type="application/javascript">
-    function checkCountGuests(event) {
-        const selects_rates = document.querySelectorAll('#selector-cards select');
-        selects_rates.forEach(function (element) {
-            console.log(element.dataset.house_id);
-            console.log('{{ houses }}');
-        })
-        console.log(selects_rates);
-    }
+      $(document).ready(function () {
+          const count_guest = document.querySelector('#count-guests');
+          count_guest.addEventListener('change', checkCountGuests);
+          let event_change = new Event("change");
+          count_guest.dispatchEvent(event_change);
 
-    $(document).ready(function () {
-        const count_guest = document.querySelector('#count-guests');
-        count_guest.addEventListener('change', checkCountGuests);
-    })
+          const selects_rates = document.querySelectorAll('#selector-cards select');
+          selects_rates.forEach(function (element) {
+              element.addEventListener('change', selectRate);
+              element.dispatchEvent(event_change);
+          });
+
+          const divs_start_date_time = document.querySelectorAll('.start-date-time');
+          divs_start_date_time.forEach(function (element) {
+              if (!element.classList.contains('start-date-time-stop')) {
+                  element.addEventListener('click', selectStartDateTime);
+              }
+          });
+
+          const btns_booking = document.querySelectorAll(".btn-booking");
+          btns_booking.forEach(function (element) {
+              element.addEventListener('click', openModalBooking);
+          });
+
+          const input_start_date = document.querySelector('#inp-start-date');
+          input_start_date.addEventListener('change', function (event) {
+              const count_guests = document.querySelector('#count-guests').valueAsNumber;
+              const start_date = document.querySelector("#inp-start-date").value;
+              openPostPage({% url 'order:index' %}, {
+                  csrfmiddlewaretoken: "{{ csrf_token }}",
+                  count_guests: count_guests,
+                  start_date: start_date
+              });
+          });
+      });
+
+      $('#modal-success').on('hidden.bs.modal', function () {
+          location.reload();
+      })
   </script>
 {% endblock %}
 

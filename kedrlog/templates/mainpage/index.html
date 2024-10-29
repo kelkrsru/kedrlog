@@ -26,10 +26,11 @@
       {% for house in content_block_booking.houseshowbooking_set.all %}
         <div onclick=openModal('house_{{ house.house.pk }}') class="house-selector__item"
              style="top: {{ house.position_top }}%; left: {{ house.position_left }}%"></div>
-        <div id='house_{{ house.house.pk }}' class="house-selector__modal" style="display: none; top: {{ house.position_top }}%; left: {{ house.position_left }}%">
+        <div id='house_{{ house.house.pk }}' class="house-selector__modal"
+             style="display: none; top: {{ house.position_top }}%; left: {{ house.position_left }}%">
           <div class="house-selector__item-wrapper hidden">
             <div class="house-selector__modal-img">
-               <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
+              <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
             </div>
 
             <div class="house-selector__modal-title">{{ house.house.name }}</div>
@@ -37,24 +38,20 @@
               <ul class="house-selector__modal-list">
                 <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
                 <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
-{#                <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
-                <li class="house-selector__modal-list-item">Максимальная вместимость: <b>до {{ house.house.max_guests }} человек</b></li>
+                {#                <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
+                <li class="house-selector__modal-list-item">Максимальная вместимость:
+                  <b>до {{ house.house.max_guests }} человек</b></li>
                 <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
               </ul>
               <div class="house-selector__modal-divider"></div>
               <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
                 {{ min_cost|get_item:house.house.pk }}
-              </span> руб./час</div>
+              </span> руб./час
+              </div>
 
               <div class="house-selector__modal-btn-wrapper">
                 <div class="house-selector__modal-btn-flex-section">
-                  <form method="post" action="{% url 'order:index' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="house" value="{{ house.house.pk }}">
-                    <input type="hidden" name="date" value="{% now "Y-m-d" %}">
-                    <input type="hidden" name="duration" value="{{ min_time|get_item:house.house.pk }}">
-                    <input type="submit" class="btn btn-success" value="Забронировать">
-                  </form>
+                  <a href="{% url 'order:index' %}" class="btn btn-success">Забронировать</a>
                 </div>
                 <span class="house-selector__modal-btn-flex-section">
                   {% for item in house.house.gallery_items.all %}
@@ -62,7 +59,8 @@
                       <a href="{{ item.image_large.url }}" class="btn btn-success" data-toggle="lightbox"
                          data-gallery="gallery_house_{{ house.house.pk }}">Посмотреть</a>
                     {% else %}
-                      <a href="{{ item.image_large.url }}" data-toggle="lightbox" data-gallery="gallery_house_{{ house.house.pk }}" style="display: none"></a>
+                      <a href="{{ item.image_large.url }}" data-toggle="lightbox"
+                         data-gallery="gallery_house_{{ house.house.pk }}" style="display: none"></a>
                     {% endif %}
                   {% endfor %}
                 </span>
@@ -74,12 +72,14 @@
           </div>
         </div>
       {% endfor %}
-      <img src="{{ content_block_booking.background_image.url }}" class="house-selector__img" alt="house choose" onclick="openModal(0)"/>
+      <img src="{{ content_block_booking.background_image.url }}" class="house-selector__img" alt="house choose"
+           onclick="openModal(0)"/>
       <div class="house-selector__socials-wrapper">
         <div class="house-selector__socials house-selector__socials-list">
           {% for network in company.social_networks.all %}
             {% if network.show_block_booking %}
-              <a class="house-selector__socials-list-item" href="{{ network.link }}" target="_blank"><img src="{{ network.icon.url }}" alt="{{ network.name }}"/></a>
+              <a class="house-selector__socials-list-item" href="{{ network.link }}" target="_blank"><img
+                src="{{ network.icon.url }}" alt="{{ network.name }}"/></a>
             {% endif %}
           {% endfor %}
         </div>
@@ -91,31 +91,27 @@
     {% for house in content_block_booking.houseshowbooking_set.all %}
       <div class="house-selector__item-wrapper hidden house-selector__item-id-100">
         <div class="house-selector__modal-img">
-            <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
+          <img src="{{ house.house.photo_main.image_small.url }}" alt="{{ house.house.photo_main.alt }}">
         </div>
         <div class="house-selector__modal-title">{{ house.house.name }}</div>
         {% if house.house.active %}
           <ul class="house-selector__modal-list">
             <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
             <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
-{#            <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
-            <li class="house-selector__modal-list-item">Максимальная вместимость: <b>до {{ house.house.max_guests }} человек</b></li>
+            {#            <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
+            <li class="house-selector__modal-list-item">Максимальная вместимость:
+              <b>до {{ house.house.max_guests }} человек</b></li>
             <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
           </ul>
           <div class="house-selector__modal-divider"></div>
           <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
             {{ min_cost|get_item:house.house.pk }}
-          </span> руб./час</div>
+          </span> руб./час
+          </div>
 
           <div class="house-selector__modal-btn-wrapper">
             <div class="house-selector__modal-btn-flex-section">
-              <form method="post" action="{% url 'order:index' %}">
-                {% csrf_token %}
-                <input type="hidden" name="house" value="{{ house.house.pk }}">
-                <input type="hidden" name="date" value="{% now "Y-m-d" %}">
-                <input type="hidden" name="duration" value="{{ min_time|get_item:house.house.pk }}">
-                <input type="submit" class="btn btn-success" value="Забронировать">
-              </form>
+              <a href="{% url 'order:index' %}" class="btn btn-success">Забронировать</a>
             </div>
             <span class="order__gallery house-selector__modal-btn-flex-section">
               {% for item in house.house.gallery_items.all %}
@@ -123,7 +119,8 @@
                   <a href="{{ item.image_large.url }}" class="btn btn-success" data-toggle="lightbox"
                      data-gallery="gallery_mobile_house_{{ house.house.pk }}">Посмотреть</a>
                 {% else %}
-                  <a href="{{ item.image_large.url }}" data-toggle="lightbox" data-gallery="gallery_mobile_house_{{ house.house.pk }}" style="display: none"></a>
+                  <a href="{{ item.image_large.url }}" data-toggle="lightbox"
+                     data-gallery="gallery_mobile_house_{{ house.house.pk }}" style="display: none"></a>
                 {% endif %}
               {% endfor %}
             </span>

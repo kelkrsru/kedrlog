@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'api',
     'mainpage',
     'core',
     'common',
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
     'personal',
     'order',
     'bootstrap_modal_forms',
+    'rest_framework',
     # 'widget_tweaks',
     # 'admin_reorder',
 ]
@@ -103,6 +105,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer']
+}
 
 AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = reverse_lazy('accounts:login')
