@@ -138,7 +138,8 @@ class SettingsSiteAdmin(admin.ModelAdmin):
         (
             'Настройки модуля бронирования',
             {
-                "fields": ['reserve_start_time', 'reserve_end_time', 'reserve_closed', 'reserve_closed_all'],
+                "fields": ['reserve_start_time', 'reserve_end_time', 'reserve_interval', 'reserve_show_interval',
+                           'reserve_closed', 'reserve_closed_all'],
             },
         ),
         (

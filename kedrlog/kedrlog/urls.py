@@ -7,6 +7,7 @@ from staticpages.views import (page_gallery, page_price, page_spa, page_gift_cer
 
 urlpatterns = [
     path('', include('mainpage.urls', namespace='mainpage')),
+    path('api/', include('api.urls', namespace='api')),
     path('personal/', include('personal.urls', namespace='personal')),
     path('accounts/', include('users.urls', namespace='accounts')),
     path('order/', include('order.urls', namespace='order')),

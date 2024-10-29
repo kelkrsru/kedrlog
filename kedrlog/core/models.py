@@ -1,11 +1,9 @@
 from urllib.parse import urlparse
-from bitrix24 import Bitrix24
 from ckeditor.fields import RichTextField
 from common.models import CreatedModel, GalleryItem, Seo, Badge
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
 from django_resized import ResizedImageField
 
 User = get_user_model()
@@ -99,9 +97,9 @@ class House(CreatedModel):
         default=10
     )
     cleaning = models.PositiveSmallIntegerField(
-        verbose_name='Время на уборку в часах',
+        verbose_name='Время на уборку в минутах',
         help_text='Если 0, то уборка отсутствует',
-        default=0
+        default=30
     )
     photo_main = models.ForeignKey(
         GalleryItem,
@@ -190,7 +188,7 @@ class Price(CreatedModel):
 
     price = models.DecimalField(
         'Цена',
-        help_text='Цена за 1 час',
+        help_text='Цена за интервал бронирования, который задается в настройках сайта',
         max_digits=10,
         decimal_places=2,
     )
@@ -243,8 +241,8 @@ class Rate(CreatedModel):
     )
     min_time = models.PositiveSmallIntegerField(
         verbose_name='Минимальное время парения',
-        help_text='Минимальное время парения в часах',
-        default=3
+        help_text='Минимальное время парения в минутах',
+        default=180
     )
     max_guest = models.PositiveSmallIntegerField(
         'Максимальное количество гостей',
@@ -277,22 +275,18 @@ class Rate(CreatedModel):
         return min(self.price.all().values_list('price', flat=True))
 
     @staticmethod
-    def is_day_of(date):
-        """Проверить день на праздничный/выходной."""
-        if date.weekday() in [4, 5, 6] or WeekendDays.objects.filter(date=date):
+    def is_day_of_weekend(date):
+        """Проверить день на праздничный."""
+        if WeekendDays.objects.filter(date=date):
             return True
         return False
 
     def get_price(self, date):
         """Получить цену, исходя из буднего/праздничного/выходного дня."""
-        if self.is_day_of(date):
-            return self.price_weekend
-        return self.price
-
-    # def save(self, *args, **kwargs):
-    #     if self.active:
-    #         Rate.objects.filter(active=True, house=self.house).update(active=False)
-    #     super().save(*args, **kwargs)
+        print(f'{date.weekday()=}')
+        if self.is_day_of_weekend(date):
+            return Price.objects.get(price_rates=self, is_active_in_weekend_day=True).price
+        return Price.objects.get(price_rates=self, day_period_validity__exact=date.weekday() + 1).price
 
     def __str__(self):
         return f'{self.name}{" " + self.comment if self.comment else ""}'
@@ -323,6 +317,7 @@ class Reserve(CreatedModel):
         verbose_name='Парная',
         on_delete=models.PROTECT,
     )
+    rate = models.ForeignKey(Rate, verbose_name='Тариф', on_delete=models.PROTECT, related_name='rate_reserves')
     count_guests = models.PositiveSmallIntegerField(
         verbose_name='Количество человек',
         validators=[MinValueValidator(1, 'Количество человек не может быть меньше 0 или 0'), ],
@@ -354,126 +349,6 @@ class Reserve(CreatedModel):
         blank=True,
         null=True
     )
-
-    @classmethod
-    def _get_start_busy(cls, reserve_date, reserve_house):
-        """Метод, который формирует множество из времени начало парения, уже занятых за переданную дату."""
-        start_date_time_busy = set()
-        tz = timezone.get_current_timezone()
-        start_date_interval = timezone.datetime.combine(reserve_date - timezone.timedelta(days=1),
-                                                        timezone.datetime.min.time(), tz)
-        end_date_interval = timezone.datetime.combine(reserve_date + timezone.timedelta(days=1),
-                                                      timezone.datetime.max.time(), tz)
-        reserve_date_interval = [start_date_interval, end_date_interval]
-        # Добавим все часы в занятые, которые вне расписания бронирования
-        settings_site = SettingsSite.objects.get(active=True)
-        reserve_start_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
-                                               hour=settings_site.reserve_start_time, minute=0, second=0)
-        if settings_site.reserve_end_time != 24:
-            reserve_end_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
-                                                 hour=settings_site.reserve_end_time, minute=0, second=0)
-        else:
-            reserve_end_time = timezone.datetime(reserve_date.year, reserve_date.month, reserve_date.day,
-                                                 hour=23, minute=59, second=59)
-        while reserve_start_time > timezone.datetime.combine(
-                reserve_date - timezone.timedelta(days=1), timezone.datetime.max.time()):
-            start_date_time_busy.add(reserve_start_time - timezone.timedelta(hours=1))
-            reserve_start_time -= timezone.timedelta(hours=1)
-        while reserve_end_time < timezone.datetime.combine(
-                reserve_date + timezone.timedelta(days=1), timezone.datetime.min.time()):
-            start_date_time_busy.add(reserve_end_time + timezone.timedelta(hours=1))
-            reserve_end_time += timezone.timedelta(hours=1)
-
-        reserves = cls.objects.filter(house=reserve_house, start_date_time__range=reserve_date_interval)
-        for reserve in reserves:
-            start_date_time = timezone.make_naive(reserve.start_date_time, tz)
-            duration = reserve.duration
-            for x in range(duration + reserve_house.cleaning):
-                date_time_add = start_date_time + timezone.timedelta(hours=x)
-                start_date_time_busy.add(date_time_add)
-
-        webhook = SettingsBitrix24.objects.get(active=True).webhook
-        b24 = Bitrix24(webhook)
-        bookings = b24.callMethod('calendar.resource.booking.list',
-                                  filter={"resourceTypeIdList": [reserve_house.id_b24],
-                                          "from": start_date_interval.strftime('%y-%m-%d'),
-                                          "to": end_date_interval.strftime('%y-%m-%d')})
-        for booking in bookings:
-            start_date_time = timezone.datetime.strptime(booking.get("DATE_FROM"), "%d.%m.%Y %H:%M:%S")
-            end_date_time = timezone.datetime.strptime(booking.get("DATE_TO"), "%d.%m.%Y %H:%M:%S")
-            while start_date_time < end_date_time + timezone.timedelta(hours=reserve_house.cleaning):
-                start_date_time_busy.add(start_date_time)
-                start_date_time += timezone.timedelta(hours=1)
-
-        return start_date_time_busy
-
-    @classmethod
-    def _get_start_allow(cls, start_date_time_busy, duration, house_cleaning, reserve_date):
-        """Метод, который формирует множество из времени начало парения, разрешенных для бронирования."""
-        # timezone.timedelta(hours=(duration + house_cleaning))
-        reserve_date = timezone.datetime.combine(reserve_date - timezone.timedelta(days=1),
-                                                 timezone.datetime.min.time())
-        date_time_range_3days = {reserve_date + timezone.timedelta(hours=i) for i in range(72)}
-
-        start_date_time_allow = date_time_range_3days.difference(start_date_time_busy)
-        start_date_time_allow = sorted(start_date_time_allow)
-        i = 0
-        while i < len(start_date_time_allow):
-            reserve_interval = [start_date_time_allow[i] + timezone.timedelta(hours=x) for x in
-                                range(duration + house_cleaning)]
-            j = False
-            for date_time in reserve_interval:
-                if date_time in start_date_time_busy:
-                    start_date_time_allow.pop(i)
-                    j = True
-                    break
-            if not j:
-                i += 1
-
-        return set(start_date_time_allow)
-
-    @staticmethod
-    def _add_start_busy_not_min_intervals(start_date_time_busy, duration, house_cleaning):
-        """Метод, который добавляет начало парения в занятое, если меньше минимального промежутка."""
-
-        min_interval = timezone.timedelta(hours=(duration + house_cleaning))
-        start_date_time_busy = sorted(start_date_time_busy)
-        start_date_time_busy_temp = list()
-
-        for i in range(len(start_date_time_busy) - 1):
-            delta = start_date_time_busy[i + 1] - start_date_time_busy[i]
-            if (delta <= min_interval) and (delta != timezone.timedelta(hours=1)):
-                j = start_date_time_busy[i + 1]
-                while j >= start_date_time_busy[i] + timezone.timedelta(hours=1):
-                    j -= timezone.timedelta(hours=1)
-                    start_date_time_busy_temp.append(j)
-        start_date_time_busy += start_date_time_busy_temp
-
-        return set(start_date_time_busy)
-
-    @classmethod
-    def get_start_busy_and_allow(cls, reserve_date, reserve_house, duration):
-        start_date_time_busy = cls._get_start_busy(reserve_date, reserve_house)
-        start_date_time_busy_temp = cls._add_start_busy_not_min_intervals(start_date_time_busy, duration,
-                                                                          reserve_house.cleaning)
-        start_date_time_allow = cls._get_start_allow(start_date_time_busy_temp, duration, reserve_house.cleaning,
-                                                     reserve_date)
-
-        return start_date_time_busy, start_date_time_allow
-
-    @classmethod
-    def check_reserve(cls, start_date_time, reserve_house, duration):
-        """Метод проверки времени на занятость."""
-        reserve_date = start_date_time.date()
-        start_date_time_busy = cls._get_start_busy(reserve_date, reserve_house)
-        reserve_interval = [start_date_time + timezone.timedelta(hours=x) for x in range(duration
-                                                                                         + reserve_house.cleaning)]
-
-        for date_time in reserve_interval:
-            date_time = date_time.replace(tzinfo=None)
-            if date_time in start_date_time_busy:
-                return False
-        return True
 
     def __str__(self):
         return f'Бронирование {self.house.name} с {self.start_date_time} по {self.end_date_time}'
@@ -1015,6 +890,12 @@ class SettingsSite(CreatedModel):
         default=24,
         validators=[MinValueValidator(0, 'Часы не могут быть меньше 0'),
                     MaxValueValidator(24, 'Часы не могут быть больше 24')],
+    )
+    reserve_interval = models.PositiveSmallIntegerField(
+        'Интервал бронирования', help_text='Интервал бронирования в минутах', default=60
+    )
+    reserve_show_interval = models.PositiveSmallIntegerField(
+        'Интервал показа бронирования', help_text='Интервал показа бронирования в минутах', default=30
     )
     reserve_closed = models.BooleanField(
         verbose_name='Бронирование закрыто',
