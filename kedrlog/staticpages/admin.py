@@ -1,7 +1,6 @@
+import staticpages.models as static_pages_models
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-
-import staticpages.models as static_pages_models
 
 FIELDS_SEO = {"fields": ["seo_title", "seo_description", "seo_keywords"]}
 
@@ -166,7 +165,7 @@ class ContentSpaAdmin(admin.ModelAdmin):
 
 
 @admin.register(static_pages_models.ContentGiftCertificate)
-class ContentSpaAdmin(admin.ModelAdmin):
+class ContentGiftCertificateAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     ordering = ['-active', ]
     fieldsets = FIELDSETS_FOR_GIFT_CERTIFICATE

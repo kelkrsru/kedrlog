@@ -1,18 +1,12 @@
-import json
-
+import staticpages.models as static_pages_models
 from bootstrap_modal_forms.generic import BSModalCreateView
+from core.models import AdditionalServices, Company, GiftCertificate, House, OrderGiftCertificate, Rate, SettingsSite
 from django.contrib.auth import get_user_model
-from django.core.serializers import serialize
-from django.core.serializers.json import DjangoJSONEncoder
 from django.forms import model_to_dict
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_list_or_404, get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
-
-from core.models import Company, GiftCertificate, OrderGiftCertificate, SettingsSite, House, Rate, Price, \
-    AdditionalServices
-from django.shortcuts import get_object_or_404, render, get_list_or_404
-import staticpages.models as static_pages_models
 from staticpages.forms import OrderGiftCertificateForm
 
 User = get_user_model()
@@ -94,7 +88,8 @@ def get_rate(request):
     rate = model_to_dict(rate, fields=['name', 'min_time', 'max_guest', 'guests_in_price', 'additional_guest_price'])
     prices_rate = {}
     for price in prices:
-        prices_rate['<br>'.join(price.day_period_validity.all().values_list('name', flat=True))] = str(round(price.price))
+        prices_rate['<br>'.join(price.day_period_validity.all()
+                                .values_list('name', flat=True))] = str(round(price.price))
 
     return JsonResponse({'result': 'Success', 'rate': rate, 'prices': prices_rate})
 

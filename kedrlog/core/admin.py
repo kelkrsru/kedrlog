@@ -1,9 +1,8 @@
 from django.contrib import admin
 
-from .models import (AdditionalFeatures, AdditionalServices, Company, House,
-                     PriceForSpaServices, Rate, Reserve, ReserveServices,
-                     SettingsBitrix24, SettingsSite, SocialNetworks,
-                     SpaServices, WeekendDays, GiftCertificate, GiftCertificateType, OrderGiftCertificate, Weeks, Price)
+from .models import (AdditionalFeatures, AdditionalServices, Company, GiftCertificate, GiftCertificateType, House,
+                     OrderGiftCertificate, Price, PriceForSpaServices, Rate, Reserve, ReserveServices, SettingsBitrix24,
+                     SettingsSite, SocialNetworks, SpaServices, WeekendDays, Weeks)
 
 admin.site.enable_nav_sidebar = False
 
@@ -171,7 +170,7 @@ class GiftCertificateAdmin(admin.ModelAdmin):
         (
             'Настройки подарочного сертификата',
             {
-                "fields": ['type','min_price', 'max_price', 'step_price', 'validity'],
+                "fields": ['type', 'min_price', 'max_price', 'step_price', 'validity'],
             },
         ),
         (
@@ -203,7 +202,7 @@ class OrderGiftCertificateAdmin(admin.ModelAdmin):
         (
             'Стоимость и оплата',
             {
-                'fields': ['price','paid', 'buy_date_time', 'used'],
+                'fields': ['price', 'paid', 'buy_date_time', 'used'],
             },
         ),
         (

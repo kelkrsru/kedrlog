@@ -1,8 +1,7 @@
+from api.serializers import PriceSerializer, RateSerializer
+from core.models import Price, Rate
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-
-from core.models import Rate, Price
-from api.serializers import RateSerializer, PriceSerializer
 
 
 class RateViewSet(viewsets.ReadOnlyModelViewSet):

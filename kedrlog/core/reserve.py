@@ -1,8 +1,7 @@
+from bitrix24 import Bitrix24
+from core.models import House, Reserve, SettingsBitrix24, SettingsSite
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from bitrix24 import Bitrix24
-
-from core.models import Reserve, House, SettingsBitrix24, SettingsSite
 
 
 def get_busy_time_for_date(house_id, reserve_date):

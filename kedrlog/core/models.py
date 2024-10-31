@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
+
 from ckeditor.fields import RichTextField
-from common.models import CreatedModel, GalleryItem, Seo, Badge
+from common.models import Badge, CreatedModel, GalleryItem, Seo
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models

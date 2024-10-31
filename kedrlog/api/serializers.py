@@ -1,5 +1,5 @@
+from core.models import Price, Rate
 from rest_framework import serializers
-from core.models import Rate, Price
 
 
 class PriceSerializer(serializers.ModelSerializer):
@@ -20,4 +20,3 @@ class RateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rate
         fields = '__all__'
-

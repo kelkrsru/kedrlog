@@ -54,10 +54,4 @@ def contact_get_or_create_in_b24(b24, user, responsible):
     user.id_b24 = contact_id
     user.save()
     return b24.callMethod('crm.contact.get', id=user.id_b24)
-
-
-def send_email_template():
-    """Отправить сообщение электронной почты по шаблону."""
-
-    send_mail(subject, message, from_email, [self.email], **kwargs)
 # **********************************************************************************************************************

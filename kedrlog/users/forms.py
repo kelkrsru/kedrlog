@@ -1,9 +1,7 @@
+from common.views import get_clean_phone
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import (AuthenticationForm, PasswordResetForm,
-                                       UserChangeForm, UserCreationForm)
-
-from common.views import get_clean_phone
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, UserChangeForm, UserCreationForm
 
 User = get_user_model()
 

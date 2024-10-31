@@ -1,9 +1,8 @@
 from ckeditor.fields import RichTextField
-from django_resized import ResizedImageField
-
 from common.models import Content, Gallery, TextContent
-from core.models import AdditionalServices, House, SpaServices, GiftCertificate
+from core.models import GiftCertificate, SpaServices
 from django.db import models
+from django_resized import ResizedImageField
 
 
 class GalleryHouses(Gallery):

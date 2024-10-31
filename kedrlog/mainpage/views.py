@@ -1,7 +1,6 @@
 from core.models import Company
 from django.shortcuts import render
-from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
-                             ContentBlockMain, ContentBlockService,
+from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure, ContentBlockMain, ContentBlockService,
                              ContentBlockYandexMap, ToastMain)
 
 COMPANY = Company.objects.get(active=True)

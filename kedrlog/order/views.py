@@ -1,20 +1,18 @@
 import decimal
-import pandas as pd
 
+import pandas as pd
 from bitrix24 import Bitrix24
 from bitrix24.exceptions import BitrixError
-from django.db.models import Max
-from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.decorators.csrf import csrf_exempt
-
-from common.views import user_get_or_create_in_site, contact_get_or_create_in_b24
+from common.views import contact_get_or_create_in_b24, user_get_or_create_in_site
 from core.models import Company, House, Rate, Reserve, ReserveServices, SettingsBitrix24, SettingsSite
+from core.reserve import check_reserve, get_busy_time_for_date
 from django.contrib.auth import get_user_model
+from django.db.models import Max
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-
-from core.reserve import get_busy_time_for_date, check_reserve
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 COMPANY = Company.objects.get(active=True)
@@ -49,14 +47,11 @@ def index(request):
     for house in houses:
         start_date_time_busy[house.id] = get_busy_time_for_date(house.id, start_date)
 
-    date_time_range = [{'print': f'{i}:00', 'value': start_date + timezone.timedelta(hours=i), 'str_value': (
-            start_date + timezone.timedelta(hours=i)).strftime('%Y-%m-%d %H:%M')} for i in
-                       range(settings_site.reserve_start_time, settings_site.reserve_end_time)]
-
-    date_time_range_2 = [
+    date_time_range = [
         {'print': f'{i.time().strftime("%H:%M")}', 'value': i, 'str_value': i.strftime('%Y-%m-%d %H:%M')} for i in
         pd.date_range(start_date + timezone.timedelta(hours=settings_site.reserve_start_time),
-                      start_date + timezone.timedelta(hours=settings_site.reserve_end_time),
+                      start_date + timezone.timedelta(hours=settings_site.reserve_end_time,
+                                                      minutes=settings_site.reserve_show_interval),
                       freq=f'{settings_site.reserve_show_interval}min')]
 
     context = {
@@ -64,7 +59,7 @@ def index(request):
         'houses': houses,
         'start_date': start_date.date(),
         'max_guests': max_guests.get('max_guest__max'),
-        'date_time_range': date_time_range_2,
+        'date_time_range': date_time_range,
         'count_guests': count_guests,
         # 'additional_services': additional_services,
         'start_date_time_busy': start_date_time_busy,

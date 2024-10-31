@@ -1,7 +1,6 @@
 from common.models import CreatedModel
 from core.models import House
-from django.core.validators import (FileExtensionValidator, MaxValueValidator,
-                                    MinValueValidator)
+from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 
 

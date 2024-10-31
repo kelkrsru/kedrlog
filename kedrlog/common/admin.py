@@ -12,7 +12,7 @@
 #
 #
 # admin.site.register(Portals, PortalsAdmin)
-from common.models import GalleryItem, Badge
+from common.models import Badge, GalleryItem
 from django.contrib import admin
 
 

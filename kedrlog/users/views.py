@@ -5,8 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
-from .forms import (ChangeForm, CreationForm, LoginForm,
-                    PasswordResetFormValidation)
+from .forms import ChangeForm, CreationForm, LoginForm, PasswordResetFormValidation
 
 EXTRA_CONTEXT = {'company': get_object_or_404(Company, active=True)}
 User = get_user_model()

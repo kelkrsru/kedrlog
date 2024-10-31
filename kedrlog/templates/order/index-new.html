@@ -84,7 +84,7 @@
                       {% for date_time in date_time_range %}
                         <div class="col-2 mt-2">
                           <div
-                            class="start-date-time {% if date_time.value in start_date_time_busy|get_item:house.id or date_time.value <= now_date_time %}start-date-time-stop{% endif %}"
+                            class="start-date-time {% if forloop.last %}hidden{% endif %} {% if date_time.value in start_date_time_busy|get_item:house.id or date_time.value <= now_date_time %}start-date-time-stop{% endif %}"
                             data-value="{{ date_time.value }}" data-str_value="{{ date_time.str_value }}"
                             id="start-date-time-{{ house.id }}-{{ forloop.counter0 }}">{{ date_time.print }}</div>
                         </div>

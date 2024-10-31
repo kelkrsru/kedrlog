@@ -1,8 +1,7 @@
 from django.contrib import admin
-from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure,
-                             ContentBlockMain, ContentBlockRoundedMenuItem,
-                             ContentBlockService, ContentBlockYandexMap,
-                             HouseShowBooking, ToastMain)
+from mainpage.models import (ContentBlockBooking, ContentBlockInfrastructure, ContentBlockMain,
+                             ContentBlockRoundedMenuItem, ContentBlockService, ContentBlockYandexMap, HouseShowBooking,
+                             ToastMain)
 
 
 @admin.register(ContentBlockMain)

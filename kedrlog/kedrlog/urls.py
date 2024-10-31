@@ -2,8 +2,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from staticpages.views import (page_gallery, page_price, page_spa, page_gift_certificate, get_rate,
-                               page_text_content, OrderGiftCertificateCreateView, OrderGiftCertificateDetailView)
+from staticpages.views import (OrderGiftCertificateCreateView, OrderGiftCertificateDetailView, get_rate, page_gallery,
+                               page_gift_certificate, page_price, page_spa, page_text_content)
 
 urlpatterns = [
     path('', include('mainpage.urls', namespace='mainpage')),

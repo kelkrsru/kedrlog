@@ -1,16 +1,13 @@
-import re
-
 from bitrix24 import Bitrix24, BitrixError
 from bootstrap_modal_forms.forms import BSModalModelForm
+from common.views import contact_get_or_create_in_b24, user_get_or_create_in_site
+from core.models import GiftCertificate, OrderGiftCertificate, SettingsBitrix24
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-
-from common.views import get_clean_phone, user_get_or_create_in_site, contact_get_or_create_in_b24
-from core.models import OrderGiftCertificate, GiftCertificate, SettingsBitrix24
 
 User = get_user_model()
 
@@ -64,7 +61,9 @@ class OrderGiftCertificateForm(BSModalModelForm):
             self.initial['user_email'] = self.user.email
             self.initial['user_phone'] = self.user.phone
             self.fields['user_phone'].widget.attrs['readonly'] = True
-            self.fields['user_phone'].help_text = f'Для изменения номера телефона необходимо отредактировать свойства вашего пользователя в <a href="{reverse_lazy("personal:index")}">личном кабинете</a>'
+            self.fields['user_phone'].help_text = (f'Для изменения номера телефона необходимо отредактировать свойства '
+                                                   f'вашего пользователя в <a href="{reverse_lazy("personal:index")}">'
+                                                   f'личном кабинете</a>')
             self.initial['user_name'] = self.user.first_name
 
     def save(self, commit=True):
@@ -81,11 +80,11 @@ class OrderGiftCertificateForm(BSModalModelForm):
         b24 = Bitrix24(webhook)
         if self.user.id_b24:
             try:
-                contact = b24.callMethod('crm.contact.get', id=self.user.id_b24)
+                b24.callMethod('crm.contact.get', id=self.user.id_b24)
             except BitrixError:
-                contact = contact_get_or_create_in_b24(b24, self.user, settings.responsible_by_default)
+                contact_get_or_create_in_b24(b24, self.user, settings.responsible_by_default)
         else:
-            contact = contact_get_or_create_in_b24(b24, self.user, settings.responsible_by_default)
+            contact_get_or_create_in_b24(b24, self.user, settings.responsible_by_default)
 
         # Рассчитываем срок действия срок действия
         validity_date_time = (timezone.now() + timezone.timedelta(days=self.gift_certificate.validity)
