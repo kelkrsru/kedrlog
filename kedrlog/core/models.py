@@ -93,8 +93,8 @@ class House(CreatedModel):
         verbose_name='Количество комнат отдыха',
         default=1
     )
-    max_guests = models.PositiveSmallIntegerField(
-        verbose_name='Максимальное количество гостей',
+    comfort = models.PositiveSmallIntegerField(
+        verbose_name='Комфортное размещение',
         default=10
     )
     cleaning = models.PositiveSmallIntegerField(

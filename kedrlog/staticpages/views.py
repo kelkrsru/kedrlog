@@ -86,6 +86,7 @@ def get_rate(request):
     rate = Rate.objects.get(id=rate_id)
     prices = rate.price.all()
     rate = model_to_dict(rate, fields=['name', 'min_time', 'max_guest', 'guests_in_price', 'additional_guest_price'])
+    rate['min_time'] = rate['min_time'] / 60
     prices_rate = {}
     for price in prices:
         prices_rate['<br>'.join(price.day_period_validity.all()
