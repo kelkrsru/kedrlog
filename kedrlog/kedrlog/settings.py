@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'order',
     'bootstrap_modal_forms',
     'rest_framework',
+    'analytical',
     # 'widget_tweaks',
     # 'admin_reorder',
 ]
@@ -150,6 +151,12 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+YANDEX_METRICA_COUNTER_ID = os.getenv('YANDEX_METRICA_COUNTER_ID')
+YANDEX_METRICA_WEBVISOR = False if os.getenv('YANDEX_METRICA_WEBVISOR') == 'False' else True
+YANDEX_METRICA_TRACKHASH = False if os.getenv('YANDEX_METRICA_TRACKHASH') == 'False' else True
+YANDEX_METRICA_NOINDEX = False if os.getenv('YANDEX_METRICA_NOINDEX') == 'False' else True
+YANDEX_METRICA_ECOMMERCE = False if os.getenv('YANDEX_METRICA_ECOMMERCE') == 'False' else True
 
 ADMIN_REORDER = (
     {'label': 'Основные настройки сайта', 'app': 'core', 'models': [

@@ -164,6 +164,21 @@ class Badge(CreatedModel):
         verbose_name = 'Плашка'
         verbose_name_plural = 'Плашки'
 
+
+# class YandexMetrica(CreatedModel):
+#     """Класс для счетчика Яндекс метрики."""
+#     active = models.BooleanField('Активность', default=True)
+#     number = models.CharField('Номер счетчика', help_text='Номер счетчика из аккаунта', max_length=15)
+#     account = models.EmailField('Аккаунт', help_text='Email, к которому привязан счетчик')
+#     code = models.TextField('Код счетчика', help_text='Код счетчика, для вставки на страницы сайта')
+#
+#     def __str__(self):
+#         return f'Счетчик №{self.number} - аккаунт {self.account}'
+#
+#     class Meta:
+#         verbose_name = 'Счетчик Яндекс Метрики'
+#         verbose_name_plural = 'Счетчики Яндекс Метрики'
+
 #
 # class Portals(models.Model):
 #     """Модель портала Битрикс24"""
