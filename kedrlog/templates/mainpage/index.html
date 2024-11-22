@@ -39,10 +39,7 @@
               <ul class="house-selector__modal-list">
                 <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
                 <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
-                {#                <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
-                <li class="house-selector__modal-list-item">Комфортное размещение:
-                  <b>до {{ house.house.comfort }} человек</b></li>
-                <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
+                <li class="house-selector__modal-list-item">Комфортное размещение:<b>до {{ house.house.comfort }} человек</b></li>
               </ul>
               <div class="house-selector__modal-divider"></div>
               <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">
@@ -99,10 +96,7 @@
           <ul class="house-selector__modal-list">
             <li class="house-selector__modal-list-item">Количество этажей: <b>{{ house.house.floor }}</b></li>
             <li class="house-selector__modal-list-item">Комнаты отдыха: <b>{{ house.house.restroom }}</b></li>
-            {#            <li class="house-selector__modal-list-item">Комфортная вместимость: <b>{{ include_guests|get_item:house.house.pk }} человек</b></li>#}
-            <li class="house-selector__modal-list-item">Комфортное размещение:
-              <b>до {{ house.house.comfort }} человек</b></li>
-            <li class="house-selector__modal-list-item">{{ house.house.cost_include }}</li>
+            <li class="house-selector__modal-list-item">Комфортное размещение:<b>до {{ house.house.comfort }} человек</b></li>
           </ul>
           <div class="house-selector__modal-divider"></div>
           <div class="house-selector__modal-cost">от <span class="house-selector__modal-cost-price">

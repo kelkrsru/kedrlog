@@ -23,7 +23,15 @@
             <img src="{{ house.photo_main.image_small.url }}" class="card-img-top" alt="price">
           {% endif %}
             <div class="card-title m-4">
-              <h5>{{ house.name }}</h5>
+              <div class="row">
+                <div class="col-9 text-color-brown">
+                  <h5 id="house-name-{{ house.id }}"><i class="fa fa-home"></i> {{ house.name }}</h5>
+                </div>
+                <div class="col-3 text-color-green text-end" data-bs-toggle="tooltip"
+                     title="Комфортное размещение">
+                  <i class="fa fa-users"></i> до {{ house.comfort }}
+                </div>
+              </div>
               <span class="fw-bold">Выберите тариф:</span>
               <div class="row flex-row mt-2 ms-0">
                 {% for rate in house.house_rates.all %}
@@ -33,15 +41,6 @@
                   </div>
                 {% endfor %}
               </div>
-{#              <div class="form-floating">#}
-{#                <select class="form-select" name="rates" id="rates-{{ house.id }}" onchange="FillDuration(this)">#}
-{#                  <option value="0" selected>Не выбрано</option>#}
-{#                    {% for rate in house.house_rates.all %}#}
-{#                      <option value="{{ rate.id }}">{{ rate.name }}</option>#}
-{#                    {% endfor %}#}
-{#                </select>#}
-{#                <label for="rates-{{ house.id }}">Выберите тариф</label>#}
-{#              </div>#}
               <div class="order-page-div mb-0"><span></span></div>
             </div>
 
@@ -50,20 +49,10 @@
                 <p class="card-text mb-1">Этажность парной: <b>{{ house.floor|ru_plural:"этаж,этажа,этажей" }}</b></p>
                 <p class="card-text mb-1">Количество комнат отдыха: <b>{{ house.restroom|ru_plural:"зона,зоны,зон" }} релакса</b></p>
                 <p class="card-text mb-1" id="min-time-{{ house.id }}"></p>
-                <p class="card-text mb-1" id="max-guest-{{ house.id }}"></p>
                 <p class="card-text mb-1" id="guests-in-price-{{ house.id }}"></p>
+                <p class="card-text mb-1" id="max-guest-{{ house.id }}"></p>
                 <p class="card-text mb-1" id="additional-guest-price-{{ house.id }}"></p>
                 <table class="table" id="table-prices-{{ house.id }}">
-{#                    <tr>#}
-{#                      <td>#}
-{#                        {% for day in price.day_period_validity.all %}#}
-{#                          {{ day.name }}<br>#}
-{#                        {% endfor %}#}
-{#                      </td>#}
-{#                      <td class="text-end align-middle fw-bold text-color-green">#}
-{#                        {{ price.price|floatformat }} <i class="fa fa-ruble"></i>#}
-{#                      </td>#}
-{#                    </tr>#}
                 </table>
               {% endwith %}
             </div>
@@ -100,7 +89,6 @@
             <thead>
               <tr>
                 <th scope="col" class="col-7">Услуга</th>
-  {#                  <th scope="col" class="col-3">Ед. изм</th>#}
                 <th scope="col" class="col-5">Цена</th>
               </tr>
             </thead>
@@ -108,7 +96,6 @@
               {% for service in services %}
                 <tr>
                   <td>{{ service.name }}</td>
-  {#                    <td>{{ service.get_measure_display }}</td>#}
                   <td class="text-color-green">{{ service.price|floatformat }} <i class="fa fa-ruble"></i></td>
                 </tr>
               {% endfor %}
@@ -157,10 +144,10 @@
             let guests_in_price_text = document.querySelector('#guests-in-price-' + house_id);
             let additional_guest_price_text = document.querySelector('#additional-guest-price-' + house_id);
             min_time_text.innerHTML = 'Минимальное время парения: <b>' + min_time + ' ' + declOfNum(min_time, ['час','часа','часов',]) + '</b>';
-            max_guest_text.innerHTML = 'Максимальное число гостей: <b>' + max_guest + ' ' + declOfNum(max_guest, ['человек','человека','человек',]) + '</b>';
+            max_guest_text.innerHTML = 'Максимальное число гостей: <b>до ' + max_guest + ' ' + declOfNum(max_guest, ['человек','человека','человек',]) + '</b>';
             guests_in_price_text.innerHTML = 'В стоимость аренды входит: <b>' + guests_in_price + ' ' + declOfNum(guests_in_price, ['комплект','комплекта','комплектов',]) + ' шапочек/тапочек/полотенец</b>';
             if (additional_guest_price > 0) {
-                additional_guest_price_text.innerHTML = 'Дополнительные гости: <b>' + Math.round(additional_guest_price) + ' <i class="fa fa-ruble"></i> за каждого гостя на все время пребывания</b>';
+                additional_guest_price_text.innerHTML = `Дополнительные гости (${guests_in_price + 1}, ${guests_in_price + 2} и последующие): <b>` + Math.round(additional_guest_price) + ' <i class="fa fa-ruble"></i> за каждого гостя на все время пребывания</b>';
             }
             else {
                 additional_guest_price_text.innerHTML = 'Дополнительные гости: <b>не допускаются</b>';
