@@ -86,12 +86,12 @@ class OrderGiftCertificateForm(BSModalModelForm):
         if not phonenumbers.is_valid_number(parsed_phone):
             raise ValidationError("Введите правильный номер телефона.")
 
-        # Форматируем в международный формат (E.164)
-        normalized = phonenumbers.format_number(
-            parsed_phone, phonenumbers.PhoneNumberFormat.E164
-        )
-        # убираем "+"
-        return normalized.lstrip("+")
+        # # Форматируем в международный формат (E.164)
+        # normalized = phonenumbers.format_number(
+        #     parsed_phone, phonenumbers.PhoneNumberFormat.E164
+        # )
+        # # убираем "+"
+        return parsed_phone
 
     def save(self, commit=True):
         order = super().save(commit=False)
