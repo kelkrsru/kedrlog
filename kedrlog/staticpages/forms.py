@@ -91,7 +91,7 @@ class OrderGiftCertificateForm(BSModalModelForm):
         #     parsed_phone, phonenumbers.PhoneNumberFormat.E164
         # )
         # # убираем "+"
-        return parsed_phone
+        return phone
 
     def save(self, commit=True):
         order = super().save(commit=False)
