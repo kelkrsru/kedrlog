@@ -63,7 +63,7 @@ class GiftCertificateOrderService:
     # --- orchestration ---
     def process(self):
         self.get_or_create_user()
-        self.sync_with_bitrix()
+        #self.sync_with_bitrix()
         self.set_validity_date()
         self.save_order()
         self.notify_admin()
