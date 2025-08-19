@@ -1,5 +1,8 @@
+import phonenumbers
+
 from django import forms
 from django.urls import reverse_lazy
+from django.core.exceptions import ValidationError
 from bootstrap_modal_forms.forms import BSModalModelForm
 
 from core.models import OrderGiftCertificate, GiftCertificate
@@ -68,6 +71,27 @@ class OrderGiftCertificateForm(BSModalModelForm):
                 f'вашего пользователя в <a href="{reverse_lazy("personal:index")}">'
                 f'личном кабинете</a>'
             )
+
+    def clean_user_phone(self):
+        phone = self.cleaned_data.get("user_phone")
+
+        if not phone:
+            raise ValidationError("Номер телефона обязателен.")
+
+        try:
+            parsed_phone = phonenumbers.parse(phone, "RU")  # RU как дефолтная страна
+        except phonenumbers.NumberParseException:
+            raise ValidationError("Некорректный номер телефона.")
+
+        if not phonenumbers.is_valid_number(parsed_phone):
+            raise ValidationError("Введите правильный номер телефона.")
+
+        # Форматируем в международный формат (E.164)
+        normalized = phonenumbers.format_number(
+            parsed_phone, phonenumbers.PhoneNumberFormat.E164
+        )
+        # убираем "+"
+        return normalized.lstrip("+")
 
     def save(self, commit=True):
         order = super().save(commit=False)
