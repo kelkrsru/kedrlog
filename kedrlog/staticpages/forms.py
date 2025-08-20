@@ -8,9 +8,12 @@ from bootstrap_modal_forms.forms import BSModalModelForm
 from core.models import OrderGiftCertificate, GiftCertificate
 from common.order_gift_certificate import GiftCertificateOrderService
 from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 
 class OrderGiftCertificateForm(BSModalModelForm):
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+
     FIELD_CONFIG = {
         "user_name": {"label": "Ваше имя:", "required": True},
         "user_lastname": {"label": "Ваша фамилия:", "required": True},
@@ -42,9 +45,6 @@ class OrderGiftCertificateForm(BSModalModelForm):
             f.required = cfg.get("required", False)
             if "widget" in cfg:
                 f.widget = cfg["widget"]
-
-        # Поле для captcha
-        captcha = ReCaptchaField()
 
         # Поля type и price зависят от сертификата
         self.fields["type"].label = "Выберите тип вашего сертификата (способ доставки):"
@@ -114,5 +114,4 @@ class OrderGiftCertificateForm(BSModalModelForm):
             "user_email",
             "type",
             "price",
-            "captcha",
         ]
