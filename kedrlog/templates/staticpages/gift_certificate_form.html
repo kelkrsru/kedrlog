@@ -35,8 +35,20 @@
                                 <span class="required text-danger">*</span>
                             {% endif %}
                         </label>
+                        {# Field Captcha #}
+                        {% if field.name == 'captcha' %}
+                            <div class="mt-3">
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in field.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         {# Field Select #}
-                        {% if field|fieldtype == 'Select' %}
+                        {% elif field|fieldtype == 'Select' %}
                             {% if field.errors %}
                                 {{ field|addclass:'form-select is-invalid' }}
                                 {% for error in field.errors %}
@@ -45,7 +57,7 @@
                             {% else %}
                                 {{ field|addclass:'form-select' }}
                             {% endif %}
-                            {# Field CheckboxInput #}
+                        {# Field CheckboxInput #}
                         {% elif field|widgettype == 'CheckboxInput' %}
                             {% if field.errors %}
                                 <div class="form-check form-switch mt-1">
@@ -59,19 +71,7 @@
                                     {{ field|addclass:'form-check-input' }}
                                 </div>
                             {% endif %}
-                            {# Field Captcha #}
-                        {% elif field.name == 'captcha' %}
-                            <div class="mt-3">
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in field.errors %}
-                                            {{ error|escape }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            {# Field Other #}
+                        {# Field Other #}
                         {% else %}
                             {% if field.errors %}
                                 {{ field|addclass:'form-control is-invalid' }}
