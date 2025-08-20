@@ -7,6 +7,7 @@ from bootstrap_modal_forms.forms import BSModalModelForm
 
 from core.models import OrderGiftCertificate, GiftCertificate
 from common.order_gift_certificate import GiftCertificateOrderService
+from django_recaptcha.fields import ReCaptchaField
 
 
 class OrderGiftCertificateForm(BSModalModelForm):
@@ -41,6 +42,9 @@ class OrderGiftCertificateForm(BSModalModelForm):
             f.required = cfg.get("required", False)
             if "widget" in cfg:
                 f.widget = cfg["widget"]
+
+        # Поле для captcha
+        captcha = ReCaptchaField()
 
         # Поля type и price зависят от сертификата
         self.fields["type"].label = "Выберите тип вашего сертификата (способ доставки):"
@@ -110,4 +114,5 @@ class OrderGiftCertificateForm(BSModalModelForm):
             "user_email",
             "type",
             "price",
+            "captcha",
         ]

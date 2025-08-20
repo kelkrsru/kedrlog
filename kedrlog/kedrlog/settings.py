@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'bootstrap_modal_forms',
     'rest_framework',
     'analytical',
+    'django_recaptcha',
     # 'widget_tweaks',
     # 'admin_reorder',
 ]
@@ -157,6 +158,9 @@ YANDEX_METRICA_WEBVISOR = False if os.getenv('YANDEX_METRICA_WEBVISOR') == 'Fals
 YANDEX_METRICA_TRACKHASH = False if os.getenv('YANDEX_METRICA_TRACKHASH') == 'False' else True
 YANDEX_METRICA_NOINDEX = False if os.getenv('YANDEX_METRICA_NOINDEX') == 'False' else True
 YANDEX_METRICA_ECOMMERCE = False if os.getenv('YANDEX_METRICA_ECOMMERCE') == 'False' else True
+
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 ADMIN_REORDER = (
     {'label': 'Основные настройки сайта', 'app': 'core', 'models': [
