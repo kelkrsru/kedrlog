@@ -35,20 +35,8 @@
                                 <span class="required text-danger">*</span>
                             {% endif %}
                         </label>
-                        {# Field Captcha #}
-                        {% if field.name == 'captcha' %}
-                            <div class="mt-3">
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in field.errors %}
-                                            {{ error|escape }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
                         {# Field Select #}
-                        {% elif field|fieldtype == 'Select' %}
+                        {% if field|fieldtype == 'Select' %}
                             {% if field.errors %}
                                 {{ field|addclass:'form-select is-invalid' }}
                                 {% for error in field.errors %}
@@ -93,18 +81,31 @@
                 {% for hidden in form.hidden_fields %}
                     <div class="form-group">
                         <label for="{{ hidden.id_for_label }}" style="display: none;">
-                            {{ hidden.label }}
+                            {{ hidden.label }} Name: {{ hidden.name }} Type: {{ hidden|fieldtype }}
                             {% if hidden.field.required %}
                                 <span class="required text-danger">*</span>
                             {% endif %}
                         </label>
-                        {% if hidden.errors %}
-                            {{ hidden|addclass:'form-control is-invalid' }}
-                            {% for error in hidden.errors %}
-                                <div class="invalid-feedback">{{ error|escape }}</div>
-                            {% endfor %}
+                        {# Field Captcha #}
+                        {% if hidden.name == 'captcha' %}
+                            <div class="mt-3">
+                                {{ hidden }}
+                                {% if hidden.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in hidden.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         {% else %}
                             {{ hidden|addclass:'form-control' }}
+                                {% if hidden.errors %}
+                                    {{ hidden|addclass:'form-control is-invalid' }}
+                                    {% for error in hidden.errors %}
+                                        <div class="invalid-feedback">{{ error|escape }}</div>
+                                    {% endfor %}                                    
+                                {% endif %}
                         {% endif %}
                     </div>
                 {% endfor %}
